@@ -1,8 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * E2E tests need the API running (docker compose up -d, or uvicorn on :8000).
- * The web app is reused if already running on :3000, otherwise `pnpm dev` is started.
+ * E2E runs an isolated stack so tests never modify the development database:
+ * - API on :8100 backed by `roleradar_e2e` (rebuilt + SIRI seed imported each run)
+ * - web on :3100 pointing at that API
+ * Requires `docker compose up -d postgres redis`.
  */
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -10,14 +12,24 @@ export default defineConfig({
   workers: 1,
   retries: 0,
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
+    baseURL: "http://localhost:3100",
     trace: "retain-on-failure",
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
-  webServer: {
-    command: "pnpm dev",
-    url: "http://localhost:3000",
-    reuseExistingServer: true,
-    timeout: 120_000,
-  },
+  webServer: [
+    {
+      command: "./tests/e2e/start-api.sh",
+      url: "http://localhost:8100/api/v1/health",
+      reuseExistingServer: false,
+      timeout: 120_000,
+      stdout: "pipe",
+    },
+    {
+      command: "pnpm exec next dev --port 3100",
+      url: "http://localhost:3100",
+      reuseExistingServer: false,
+      timeout: 120_000,
+      env: { NEXT_PUBLIC_API_BASE_URL: "http://localhost:8100" },
+    },
+  ],
 });

@@ -31,7 +31,7 @@ cd apps/api && uv run celery -A app.workers.celery_app worker --loglevel=INFO   
 ```bash
 # frontend (repo root)
 pnpm lint && pnpm typecheck && pnpm test && pnpm build
-pnpm test:e2e                          # needs the API running
+pnpm test:e2e                          # isolated stack: api :8100 (db roleradar_e2e) + web :3100
 
 # backend (apps/api; needs `docker compose up -d postgres redis`)
 uv run ruff check . && uv run ruff format --check . && uv run mypy && uv run pytest

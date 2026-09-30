@@ -52,7 +52,7 @@ export function CompaniesTable({ query, onQueryChange, renderActions, caption }:
           <thead className="bg-surface text-left text-xs text-muted">
             <tr>
               {COLUMNS.map((column) => (
-                <th key={column} scope="col" className="px-3 py-2 font-medium">
+                <th key={column} scope="col" className="whitespace-nowrap px-3 py-2 font-medium">
                   {column}
                 </th>
               ))}
@@ -73,6 +73,12 @@ export function CompaniesTable({ query, onQueryChange, renderActions, caption }:
                   <tr key={company.id} className="border-t border-border hover:bg-surface/60">
                     <th scope="row" className="px-3 py-2 text-left font-medium">
                       {company.company_name}
+                      {company.eures_notes && (
+                        <p className="mt-0.5 max-w-md truncate text-xs font-normal text-muted">
+                          <span className="sr-only">Note: </span>
+                          {company.eures_notes}
+                        </p>
+                      )}
                     </th>
                     <td className="px-3 py-2 font-mono text-xs tabular-nums">{company.cvr}</td>
                     <td className="px-3 py-2">
@@ -85,7 +91,7 @@ export function CompaniesTable({ query, onQueryChange, renderActions, caption }:
                       {formatDateTime(company.eures_last_checked_at)}
                     </td>
                     <td className="px-3 py-2">
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex items-center gap-2 whitespace-nowrap">
                         {renderActions(company)}
                       </div>
                     </td>

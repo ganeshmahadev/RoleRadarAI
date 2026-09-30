@@ -1,8 +1,9 @@
 "use client";
 
+import { EuresRowActions } from "@/features/eures/eures-row-actions";
+
 import { CompaniesTable } from "./companies-table";
 import { CompanyToolbar } from "./company-toolbar";
-import { OpenEuresLink } from "./open-eures-link";
 import { useCompanyQuery } from "./use-company-query";
 
 export function CompaniesView() {
@@ -16,7 +17,7 @@ export function CompaniesView() {
         onQueryChange={setQuery}
         renderActions={(company) => (
           <>
-            <OpenEuresLink company={company} />
+            <EuresRowActions company={company} />
             {company.careers_url && (
               <a
                 href={company.careers_url}

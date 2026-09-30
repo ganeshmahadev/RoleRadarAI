@@ -11,9 +11,9 @@
 ## Current state
 
 ```text
-Active phase: P3 — EURES discovery workflow (P1 complete)
-Active item: P3-002
-Last known-good commit: P3-001 (see P3-001 completion)
+Active phase: P3 complete (P0, P1, P3 done) — STOPPED for human review
+Active item: none (next: P4-001, needs human go-ahead)
+Last known-good commit: P3-002 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
 Last updated: 2026-10-01
@@ -342,28 +342,34 @@ ERROR
 
 Notes: `eures_status` cannot be PATCHed directly, only through transition endpoints. Structured log events `eures_opened`, `eures_no_relevant_jobs`, `eures_error`, `eures_reset`, `eures_notes_updated`.
 
-Completion commit: this commit; hash recorded in P3-002.
+Completion commit: `850fe2b`
 
 ---
 
 ## P3-002 — Build EURES discovery queue UI
 
-**Status:** TODO  
+**Status:** DONE  
 **Depends on:** P3-001, P1-004
 
 ### Acceptance criteria
 
-- [ ] list SIRI companies;
-- [ ] search/filter;
-- [ ] open company-specific EURES search;
-- [ ] record opened/checked state;
-- [ ] mark no relevant jobs;
-- [ ] add note;
-- [ ] next unchecked company;
-- [ ] state persists after browser restart;
-- [ ] tests.
+- [x] list SIRI companies (`/eures`, defaults to unchecked; reuses P1 table/toolbar);
+- [x] search/filter;
+- [x] open company-specific EURES search (new tab; records `OPENED`);
+- [x] record opened/checked state (stats bar: companies / checked / remaining);
+- [x] mark no relevant jobs, mark error, reset;
+- [x] add note (native `<dialog>`; notes shown under company name);
+- [x] next unchecked company ("Next unchecked company" panel from server state; Skip keeps `?after=` in URL);
+- [x] state persists after browser restart (server state; Playwright reload check);
+- [x] tests (Vitest 19 total; Playwright 8 total incl. axe on /eures).
+
+The same row actions now also appear on `/companies` (PRD §23 phase availability for P3).
 
 Original-job import moved to P4-010.
+
+### P3 phase exit (2026-10-01)
+
+P3-001 and P3-002 DONE. Acceptance (IMPLEMENTATION_PLAN §53, as amended): start with company 1 → open its EURES search (OPENED) → return → mark completed (CHECKED_NO_JOBS) → continue to the next unchecked company → refresh → state unchanged → counters correct. Verified by `tests/e2e/eures-queue.spec.ts`. The "import an employer vacancy" step belongs to P4-010.
 
 ---
 
@@ -933,32 +939,46 @@ Notes:
 # Overnight handoff
 
 ```text
-Last updated:
-Last commit:
-Current branch:
-Worktree:
-Active phase:
-Active item:
-Status:
+Last updated: 2026-10-01
+Last commit: see `git log -1` (P3-002 commit; hash also recorded by the follow-up docs commit)
+Current branch: main (local only; nothing pushed — origin/main does not exist yet)
+Worktree: clean
+Active phase: none — P0, P1, P3 complete; authorized scope finished
+Active item: none
+Status: STOPPED for human review (human authorized only P0, P1, P3)
 
 Completed this run:
-- ...
+- META-001..003 docs (bb18c1a)
+- P0-001 bootstrap (f7845b2)
+- P1-001 Company model (d0a9428), P1-002 SIRI import (9a64b1b),
+  P1-003 Companies API (d15e238), P1-004 Companies UI (9fc8b5f)
+- P3-001 EURES backend (850fe2b), P3-002 EURES queue UI (this commit)
 
-Validation:
-- ...
+Validation (all run at the end of P3):
+- backend: ruff check, ruff format --check, mypy strict, pytest (69) — PASS
+- frontend: pnpm lint, typecheck, test (19), build — PASS
+- pnpm test:e2e (8, isolated stack, incl. axe WCAG A/AA on /, /companies, /eures) — PASS
+- docker compose up -d --build: all 5 services healthy; dev DB seeded (982, all NOT_CHECKED)
 
 Blocked:
-- ...
+- P5 blocked on PRD §83 OD-1..OD-4 (OpenJev contract, must-have mapping, hard-blocker effect, display format).
 
 Uncommitted files:
-- ...
+- none
 
-Exact next action:
-1. ...
+Exact next action (after human approval):
+1. P4-001: Job + JobSource models and migration (PRD §15 decisions).
+2. P4-002: SSRF-safe fetcher (PRD §67 + ARCHITECTURE §6), then P4-003 connector protocol.
+3. P4-010: wire "Import job URL" into the EURES queue rows and the current-company panel.
 
 Useful commands:
-- ...
+- docker compose up -d postgres redis
+- cd apps/api && uv run pytest
+- pnpm test && pnpm test:e2e
+- docker compose exec api python -m app.commands.import_siri /data/siri_certified_companies_eures_queue.xlsx
 
 Important observations:
-- ...
+- Dev DB `roleradar` (host :5433) holds the real queue state. Tests use `roleradar_test`, E2E uses `roleradar_e2e`.
+- Host port 5432 and 3001 are used by other projects on this machine.
+- Next.js 16: read apps/web/node_modules/next/dist/docs before using unfamiliar APIs.
 ```
