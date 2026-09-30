@@ -940,7 +940,7 @@ Notes:
 
 ```text
 Last updated: 2026-10-01
-Last commit: see `git log -1` (P3-002 commit; hash also recorded by the follow-up docs commit)
+Last commit: d4dd3ef (P3-002)
 Current branch: main (local only; nothing pushed — origin/main does not exist yet)
 Worktree: clean
 Active phase: none — P0, P1, P3 complete; authorized scope finished
@@ -952,7 +952,7 @@ Completed this run:
 - P0-001 bootstrap (f7845b2)
 - P1-001 Company model (d0a9428), P1-002 SIRI import (9a64b1b),
   P1-003 Companies API (d15e238), P1-004 Companies UI (9fc8b5f)
-- P3-001 EURES backend (850fe2b), P3-002 EURES queue UI (this commit)
+- P3-001 EURES backend (850fe2b), P3-002 EURES queue UI (d4dd3ef)
 
 Validation (all run at the end of P3):
 - backend: ruff check, ruff format --check, mypy strict, pytest (69) — PASS
