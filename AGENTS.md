@@ -165,6 +165,7 @@ uv run alembic upgrade head
 uv run alembic revision --autogenerate -m "<message>"   # inspect the generated file
 uv run uvicorn app.main:app --reload --port 8000
 uv run celery -A app.workers.celery_app worker --loglevel=INFO
+uv run python -m app.commands.import_siri ../../data/siri_certified_companies_eures_queue.xlsx  # idempotent seed
 uv run ruff check . && uv run ruff format --check .
 uv run mypy                            # strict
 uv run pytest                          # uses Postgres db `roleradar_test` (auto-created, rebuilt from migrations)

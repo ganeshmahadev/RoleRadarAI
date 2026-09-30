@@ -12,8 +12,8 @@
 
 ```text
 Active phase: P1 — SIRI company foundation
-Active item: P1-002
-Last known-good commit: P1-001 (see P1-001 completion)
+Active item: P1-003
+Last known-good commit: P1-002 (see P1-002 completion)
 Current branch: main
 Worktree: clean after P0 commit
 Last updated: 2026-10-01
@@ -144,14 +144,14 @@ Notes: added `source_position` (SIRI list row ID) for queue order, documented in
 
 ### Completion commit
 
-This commit (`feat(companies): add Company model and migration [P1-001]`); hash in P1-002.
+`d0a9428`
 
 ---
 
 ## P1-002 — Import the SIRI seed workbook
 
 **Phase:** P1  
-**Status:** TODO  
+**Status:** DONE  
 **Priority:** P0  
 **Depends on:** P1-001
 
@@ -167,20 +167,24 @@ into PostgreSQL.
 
 ### Acceptance criteria
 
-- [ ] all source rows import;
-- [ ] company names preserved;
-- [ ] CVR values preserved as strings (incl. `423380281`, `8485085`);
-- [ ] normalized names stored separately;
-- [ ] generated EURES URL equals workbook URL for all 982 rows;
-- [ ] re-import does not overwrite EURES workflow state;
-- [ ] no accidental duplicates;
-- [ ] import is safe to rerun/idempotent;
-- [ ] tests include unusual CVR values;
-- [ ] committed.
+- [x] all source rows import (982);
+- [x] company names preserved;
+- [x] CVR values preserved as strings (incl. `423380281`, `8485085`); numeric CVR cells rejected, never coerced;
+- [x] normalized names stored separately (reproduces workbook `Normalized Name` for all 982);
+- [x] generated EURES URL equals workbook URL for all 982 rows;
+- [x] re-import does not overwrite EURES workflow state;
+- [x] no accidental duplicates (duplicate CVRs in a workbook abort the import);
+- [x] import is safe to rerun/idempotent;
+- [x] tests include unusual CVR values;
+- [x] committed.
+
+Entry point: `uv run python -m app.commands.import_siri ../../data/siri_certified_companies_eures_queue.xlsx` (Docker: `docker compose exec api python -m app.commands.import_siri /data/siri_certified_companies_eures_queue.xlsx`).
+
+Deferred: `POST /companies/import/excel` and `POST /companies/import/siri` (PRD §43). The CLI covers the one-time seed; add the upload endpoint (with size limit + MIME validation) when a UI re-import is needed.
 
 ### Completion commit
 
-`<pending>`
+This commit; hash recorded in P1-003.
 
 ---
 
