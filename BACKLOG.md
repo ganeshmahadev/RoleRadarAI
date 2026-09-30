@@ -12,8 +12,8 @@
 
 ```text
 Active phase: P1 — SIRI company foundation
-Active item: P1-001
-Last known-good commit: P0-001 bootstrap (see Recently completed)
+Active item: P1-002
+Last known-good commit: P1-001 (see P1-001 completion)
 Current branch: main
 Worktree: clean after P0 commit
 Last updated: 2026-10-01
@@ -98,7 +98,7 @@ See "Recently completed" (hash recorded after commit).
 ## P1-001 — Add Company model and migration
 
 **Phase:** P1 — SIRI company foundation  
-**Status:** TODO  
+**Status:** DONE  
 **Priority:** P0
 
 ### Goal
@@ -133,16 +133,18 @@ CVR is a string. Preserve source values exactly.
 
 ### Acceptance criteria
 
-- [ ] model exists;
-- [ ] migration exists;
-- [ ] CVR uniqueness behavior defined/tested;
-- [ ] repository/service layer follows project conventions;
-- [ ] tests pass;
-- [ ] committed.
+- [x] model exists (`apps/api/app/models/company.py`);
+- [x] migration exists (`885ccfb342f6`, upgrade/downgrade/`alembic check` verified);
+- [x] CVR uniqueness behavior defined/tested (`uq_companies_cvr`);
+- [x] repository/service layer follows project conventions;
+- [x] tests pass (12);
+- [x] committed.
+
+Notes: added `source_position` (SIRI list row ID) for queue order, documented in PRD §14. `eures_status` is VARCHAR + CHECK constraint (not a native PG enum) so the vocabulary can evolve with plain migrations.
 
 ### Completion commit
 
-`<pending>`
+This commit (`feat(companies): add Company model and migration [P1-001]`); hash in P1-002.
 
 ---
 
@@ -877,7 +879,7 @@ Move completed items here rather than deleting history.
 
 Status: DONE
 Completed: 2026-10-01
-Commit: `<recorded in next commit>`
+Commit: `f7845b2`
 Validation:
 - backend: `uv run ruff check .`, `uv run ruff format --check .`, `uv run mypy` (strict), `uv run pytest` (5 passed) — PASS
 - frontend: `pnpm lint`, `pnpm typecheck`, `pnpm test` (2 passed), `pnpm build` — PASS

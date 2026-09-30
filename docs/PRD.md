@@ -674,6 +674,7 @@ id UUID PK
 company_name TEXT
 normalized_name TEXT
 cvr TEXT
+source_position INTEGER      -- row ID in the SIRI source list; queue order (Decision 2026-10-01)
 siri_certified BOOLEAN
 siri_source_url TEXT
 siri_last_seen_at TIMESTAMP
