@@ -142,27 +142,39 @@ CLAUDE.md
 
 ## 7. Canonical commands
 
-Replace placeholders below with the real commands as soon as the workspace is bootstrapped. Keep this section current.
+Frontend: pnpm workspace at the repo root (`apps/web`). Backend: uv project in `apps/api` (Python 3.13).
 
 ```bash
-# frontend
-pnpm install
-pnpm dev
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm build
-
-# backend
-# use the repository's selected Python environment command
-ruff check .
-pytest
-
 # infrastructure
-docker compose up -d
+cp .env.example .env                   # local only, never commit .env
+docker compose up -d postgres redis    # Postgres on host port 5433, Redis on 6379
+docker compose up -d --build           # full stack: web :3000, api :8000, worker
+
+# frontend (run from repo root)
+pnpm install
+pnpm dev                               # http://localhost:3000
+pnpm lint
+pnpm typecheck                         # next typegen && tsc --noEmit
+pnpm test                              # Vitest + React Testing Library (apps/web/tests/unit)
+pnpm build
+pnpm test:e2e                          # Playwright (apps/web/tests/e2e); needs API on :8000
+
+# backend (run from apps/api)
+uv sync
+uv run alembic upgrade head
+uv run alembic revision --autogenerate -m "<message>"   # inspect the generated file
+uv run uvicorn app.main:app --reload --port 8000
+uv run celery -A app.workers.celery_app worker --loglevel=INFO
+uv run ruff check . && uv run ruff format --check .
+uv run mypy                            # strict
+uv run pytest                          # uses Postgres db `roleradar_test` (auto-created, rebuilt from migrations)
 ```
 
-If repository scripts differ, use the repository scripts and update this file.
+Backend layout: `app/api/v1` (routers), `app/core` (config), `app/db` (engine/session/Base), `app/models` (ORM; import every model in `app/models/__init__.py`), `app/schemas` (Pydantic), `app/services` (business logic), `app/workers` (Celery), `migrations/` (Alembic).
+
+Frontend layout: `app/` (routes), `components/` (shared UI), `features/<area>/` (feature components), `lib/api/` (typed fetch client + Zod schemas), `tests/unit`, `tests/e2e`.
+
+Next.js is **v16**: read `apps/web/node_modules/next/dist/docs/` before using unfamiliar APIs (see `apps/web/AGENTS.md`). `params`/`searchParams` are async.
 
 Never report a command as passing unless it was actually run.
 

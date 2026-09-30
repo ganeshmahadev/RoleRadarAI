@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+/* Design tokens: dense, neutral productivity UI (PRD §47–48). 8px spacing via Tailwind's scale. */
+:root {
+  --background: #ffffff;
+  --surface: #f7f7f8;
+  --foreground: #18181b;
+  --muted: #5f5f6b;
+  --border: #e4e4e7;
+  --accent: #1d4ed8;
+  --success: #15803d;
+  --warning: #b45309;
+  --danger: #b91c1c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0b0b0d;
+    --surface: #151518;
+    --foreground: #ededf0;
+    --muted: #a1a1aa;
+    --border: #2a2a30;
+    --accent: #60a5fa;
+    --success: #4ade80;
+    --warning: #fbbf24;
+    --danger: #f87171;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}

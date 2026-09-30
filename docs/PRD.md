@@ -2666,4 +2666,3 @@ These are unresolved. Do not invent answers; resolve with the user before the li
 | OD-3 | Effect of a hard blocker on `overall_score` and category: cap the score, force "Low Match", or show a separate blocker badge with the score unchanged. | P5 | §19 requires blockers not to be hidden inside an average. |
 | OD-4 | Dimension display format: `x/4` ordinals (§32) or 0–100 bars (§49). Ordinals from the model are integers, so "3.7/4" in §32 has no defined source. | P5/P6 | |
 | OD-5 | What happens to companies missing from a later SIRI list (keep, mark `siri_certified=false`, or `active=false`). | future SIRI refresh | Not needed for the one-time seed import. |
-
