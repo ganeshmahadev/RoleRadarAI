@@ -12,8 +12,8 @@
 
 ```text
 Active phase: P1 — SIRI company foundation
-Active item: P1-003
-Last known-good commit: P1-002 (see P1-002 completion)
+Active item: P1-004
+Last known-good commit: P1-003 (see P1-003 completion)
 Current branch: main
 Worktree: clean after P0 commit
 Last updated: 2026-10-01
@@ -184,25 +184,27 @@ Deferred: `POST /companies/import/excel` and `POST /companies/import/siri` (PRD 
 
 ### Completion commit
 
-This commit; hash recorded in P1-003.
+`9a64b1b`
 
 ---
 
 ## P1-003 — Build Companies API
 
 **Phase:** P1  
-**Status:** TODO  
+**Status:** DONE  
 **Depends on:** P1-001, P1-002
 
 ### Acceptance criteria
 
-- [ ] list companies;
-- [ ] pagination;
-- [ ] text search;
-- [ ] relevant filters;
-- [ ] company detail;
-- [ ] tests;
-- [ ] committed.
+- [x] list companies (`GET /api/v1/companies`, SIRI list order by default; `sort=name|last_checked`);
+- [x] pagination (`page`, `page_size` ≤ 200; response `{items,total,page,page_size}`);
+- [x] text search (`q`: name ILIKE, normalized name, CVR prefix; LIKE wildcards escaped);
+- [x] relevant filters (`eures_status` multi, `checked`, `siri_certified`);
+- [x] company detail (`GET /api/v1/companies/{id}`, 404/422);
+- [x] tests (52 backend tests total);
+- [x] committed.
+
+Completion commit: this commit; hash recorded in P1-004.
 
 ---
 
