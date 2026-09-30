@@ -12,8 +12,8 @@
 
 ```text
 Active phase: P3 — EURES discovery workflow (P1 complete)
-Active item: P3-001
-Last known-good commit: P1-004 (see P1-004 completion)
+Active item: P3-002
+Last known-good commit: P3-001 (see P3-001 completion)
 Current branch: main
 Worktree: clean after P0 commit
 Last updated: 2026-10-01
@@ -231,7 +231,7 @@ Completion commit: `d15e238`
 
 Reusable for P3: `CompanyToolbar`, `CompaniesTable` (`renderActions` prop), `useCompanyQuery`.
 
-Completion commit: this commit; hash recorded in P3-001.
+Completion commit: `9fc8b5f`
 
 ### P1 phase exit (2026-10-01)
 
@@ -318,7 +318,7 @@ AI extraction must remain editable.
 
 ## P3-001 — Add EURES queue state to backend
 
-**Status:** TODO
+**Status:** DONE
 
 **Depends on:** P1 phase exit
 
@@ -334,11 +334,15 @@ ERROR
 
 ### Acceptance criteria
 
-- [ ] transition endpoints per PRD §8 (opened, no relevant jobs, error, reset, notes);
-- [ ] OPENED never downgrades a completed status;
-- [ ] next-unchecked endpoint (NOT_CHECKED or OPENED, ID order);
-- [ ] queue stats (total / checked / remaining);
-- [ ] tests.
+- [x] transition endpoints per PRD §8 (opened, no relevant jobs, error, reset, notes); see PRD §43;
+- [x] OPENED never downgrades a completed status;
+- [x] next-unchecked endpoint (NOT_CHECKED or OPENED, SIRI order, `after_position`, wraps around);
+- [x] queue stats (total / checked / remaining / by_status);
+- [x] tests (69 backend tests total).
+
+Notes: `eures_status` cannot be PATCHed directly, only through transition endpoints. Structured log events `eures_opened`, `eures_no_relevant_jobs`, `eures_error`, `eures_reset`, `eures_notes_updated`.
+
+Completion commit: this commit; hash recorded in P3-002.
 
 ---
 

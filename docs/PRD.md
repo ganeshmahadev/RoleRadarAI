@@ -1863,6 +1863,20 @@ POST   /companies/{id}/mark-eures-checked
 POST   /companies/{id}/mark-no-jobs
 ```
 
+As implemented in P3 (Decision 2026-10-01, see §8): "mark checked" and "mark no jobs" are one action, `POST /companies/{id}/mark-no-jobs`, so `mark-eures-checked` is not a separate endpoint. Additional workflow endpoints:
+
+```http
+POST   /companies/{id}/eures-opened        NOT_CHECKED → OPENED (never downgrades)
+POST   /companies/{id}/mark-eures-error    → ERROR
+POST   /companies/{id}/reset-eures         → NOT_CHECKED
+PATCH  /companies/{id}                     { "eures_notes": "..." } (only editable field in P3)
+
+GET    /eures/stats                        total / checked / remaining / by_status
+GET    /eures/next-unchecked?after_position=N   next NOT_CHECKED or OPENED in SIRI order (wraps)
+```
+
+`POST /companies/import/siri` and `/companies/import/excel` are deferred; the seed import is a CLI command (see AGENTS.md).
+
 ---
 
 ## EURES
