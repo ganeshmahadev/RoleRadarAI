@@ -11,9 +11,9 @@
 ## Current state
 
 ```text
-Active phase: P1 — SIRI company foundation
-Active item: P1-004
-Last known-good commit: P1-003 (see P1-003 completion)
+Active phase: P3 — EURES discovery workflow (P1 complete)
+Active item: P3-001
+Last known-good commit: P1-004 (see P1-004 completion)
 Current branch: main
 Worktree: clean after P0 commit
 Last updated: 2026-10-01
@@ -204,30 +204,38 @@ Deferred: `POST /companies/import/excel` and `POST /companies/import/siri` (PRD 
 - [x] tests (52 backend tests total);
 - [x] committed.
 
-Completion commit: this commit; hash recorded in P1-004.
+Completion commit: `d15e238`
 
 ---
 
 ## P1-004 — Build Companies UI
 
 **Phase:** P1  
-**Status:** TODO  
+**Status:** DONE  
 **Depends on:** P1-003
 
 ### Acceptance criteria
 
-- [ ] Next.js companies page;
-- [ ] searchable/filterable table;
-- [ ] CVR shown as text;
-- [ ] SIRI status visible;
-- [ ] EURES status visible;
-- [ ] Open EURES action (new tab);
-- [ ] no job/relevance columns or placeholder actions (PRD §23 phase availability);
-- [ ] accessible keyboard interactions;
-- [ ] responsive behavior;
-- [ ] loading/empty/error states;
-- [ ] frontend tests;
-- [ ] committed.
+- [x] Next.js companies page (`/companies`);
+- [x] searchable/filterable table (debounced search, EURES status incl. checked/unchecked, sort, SIRI-only; state in URL);
+- [x] CVR shown as text (monospace, never coerced);
+- [x] SIRI status visible;
+- [x] EURES status visible;
+- [x] Open EURES action (new tab, `rel="noopener noreferrer"`);
+- [x] no job/relevance columns or placeholder actions (PRD §23 phase availability); careers link only when `careers_url` set;
+- [x] accessible keyboard interactions (native controls, focus rings, row headers, axe WCAG A/AA clean);
+- [x] responsive behavior (wrapping toolbar, horizontally scrollable table container);
+- [x] loading/empty/error states (skeleton rows, empty message, alert + retry);
+- [x] frontend tests (Vitest 11, Playwright 5 incl. axe);
+- [x] committed.
+
+Reusable for P3: `CompanyToolbar`, `CompaniesTable` (`renderActions` prop), `useCompanyQuery`.
+
+Completion commit: this commit; hash recorded in P3-001.
+
+### P1 phase exit (2026-10-01)
+
+All P1 items DONE. Acceptance (IMPLEMENTATION_PLAN §51): 982 rows import; no duplicate CVRs; names match workbook; search + filters work; EURES URL for every company equals the workbook URL; odd CVRs preserved; re-import idempotent and preserves EURES state.
 
 ---
 

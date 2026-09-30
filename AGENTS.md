@@ -157,7 +157,7 @@ pnpm lint
 pnpm typecheck                         # next typegen && tsc --noEmit
 pnpm test                              # Vitest + React Testing Library (apps/web/tests/unit)
 pnpm build
-pnpm test:e2e                          # Playwright (apps/web/tests/e2e); needs API on :8000
+pnpm test:e2e                          # Playwright + axe a11y (apps/web/tests/e2e); needs API on :8000 with the SIRI seed imported
 
 # backend (run from apps/api)
 uv sync
