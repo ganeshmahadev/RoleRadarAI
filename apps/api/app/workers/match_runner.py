@@ -5,9 +5,10 @@ import uuid
 
 from app.core.config import get_settings
 from app.db.session import standalone_session
+from app.discovery.jobspy_source import JobSpyClient, LiveJobSpyClient
 from app.providers.decision import DecisionUnavailable
 from app.providers.factory import get_decision_provider
-from app.services import match_run_service, match_service
+from app.services import discovery_service, match_run_service, match_service
 
 logger = logging.getLogger(__name__)
 
@@ -39,4 +40,38 @@ async def execute_match_run(run_id: uuid.UUID) -> None:
             )
             await session.rollback()
             await match_run_service.fail_run(session, run_id, "RUN_CRASHED", str(exc)[:300])
+            raise
+
+
+def jobspy_client() -> JobSpyClient | None:
+    """None when job-board discovery is off (PRD §84 guardrail: off by default)."""
+    settings = get_settings()
+    if not settings.discovery_jobspy_enabled:
+        return None
+    if settings.discovery_sources == "fake":
+        from tests.fake_jobspy import FakeJobSpyClient  # deterministic E2E data
+
+        return FakeJobSpyClient()
+    return LiveJobSpyClient()
+
+
+async def execute_discovery_run(run_id: uuid.UUID) -> None:
+    settings = get_settings()
+    async with standalone_session() as session:
+        try:
+            await discovery_service.execute_run(
+                session,
+                run_id,
+                client=jobspy_client(),
+                provider=get_decision_provider(),
+                delays=settings.match_retry_delays_seconds,
+                pause_seconds=settings.discovery_pause_seconds,
+            )
+        except Exception as exc:
+            logger.exception(
+                "discovery_run_crashed",
+                extra={"event": "discovery_run_crashed", "run_id": str(run_id)},
+            )
+            await session.rollback()
+            await discovery_service.fail_run(session, run_id, "RUN_CRASHED", str(exc)[:300])
             raise

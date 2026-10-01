@@ -25,6 +25,8 @@ class MatchQueue(Protocol):
 
     async def enqueue_run(self, run_id: uuid.UUID) -> None: ...
 
+    async def enqueue_discovery(self, run_id: uuid.UUID) -> None: ...
+
 
 class CeleryMatchQueue:
     async def _send(self, task: str, arg: uuid.UUID) -> None:
@@ -40,6 +42,9 @@ class CeleryMatchQueue:
 
     async def enqueue_run(self, run_id: uuid.UUID) -> None:
         await self._send("roleradar.match_run", run_id)
+
+    async def enqueue_discovery(self, run_id: uuid.UUID) -> None:
+        await self._send("roleradar.discovery_run", run_id)
 
 
 class InlineMatchQueue:
@@ -62,6 +67,11 @@ class InlineMatchQueue:
         from app.workers.match_runner import execute_match_run
 
         self._spawn(execute_match_run(run_id))
+
+    async def enqueue_discovery(self, run_id: uuid.UUID) -> None:
+        from app.workers.match_runner import execute_discovery_run
+
+        self._spawn(execute_discovery_run(run_id))
 
     async def drain(self) -> None:
         while self._tasks:

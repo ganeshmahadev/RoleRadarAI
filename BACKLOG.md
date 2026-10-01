@@ -869,11 +869,11 @@ Exact next step after unblock: save sanitized search/detail fixtures under `apps
 
 ## P14-003 — Source types, discovery settings and run models
 
-**Status:** TODO
+**Status:** DONE — SourceType `indeed|linkedin|google|eures` (CHECK constraints recreated), `discovery_settings` singleton, `discovery_runs`; migration `a2c571fad892` (round-trip on `roleradar_test` only).
 
 ## P14-004 — JobSpy source (Indeed DK, LinkedIn, Google) + cross-board dedup
 
-**Status:** TODO
+**Status:** DONE — `app/discovery/jobspy_source.py` (JobSpy from GitHub main @ `dbcbf85`: the PyPI 1.1.82 release pins numpy 1.26.3, which breaks on Python 3.13), `JobSpyClient` protocol + `LiveJobSpyClient`, per-site params (Indeed `country_indeed=denmark`, LinkedIn `fetch_description`, Google query), row → `NormalizedJob` (HTML → text), block detection; `store_normalized(similar_within_days=30)` attaches the same vacancy from another board to the existing job (text kept).
 
 ## P14-005 — EURES scan source (per company, rotation, status updates)
 
@@ -881,7 +881,7 @@ Exact next step after unblock: save sanitized search/detail fixtures under `apps
 
 ## P14-006 — Discovery orchestrator, time budget, Celery task, API + SSE
 
-**Status:** TODO
+**Status:** IN_PROGRESS — backend done: `discovery_service` (scrape → EURES → score with deadlines; blocked board continues; one active run; guardrail errors), `execute_run(deadline=)`, Celery `roleradar.discovery_run` (not acks_late), inline queue, `/discovery/settings`, `/discovery-runs` (+cancel, SSE); 23 tests (364 backend total). EURES phase reports "unavailable" until P14-005.
 
 ## P14-007 — Discover page (settings, Search now, progress, results)
 

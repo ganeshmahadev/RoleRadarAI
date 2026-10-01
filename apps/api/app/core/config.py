@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     match_queue: Literal["celery", "inline"] = "celery"
     # Bounded exponential backoff while OpenJev is unavailable during a batch run (P7-004).
     match_retry_delays_seconds: list[float] = [30.0, 60.0, 120.0]
+    # Automated discovery (PRD §84, user override for local testing). Off by default.
+    discovery_jobspy_enabled: bool = False
+    eures_scraper_enabled: bool = False
+    discovery_sources: Literal["live", "fake"] = "live"  # "fake" = deterministic E2E data
+    discovery_pause_seconds: float = 5.0  # between job-board searches
+    eures_crawl_delay_seconds: float = 10.0  # europa.eu robots.txt Crawl-delay
     # How often the SSE progress stream checks the database.
     run_events_poll_seconds: float = 1.0
 

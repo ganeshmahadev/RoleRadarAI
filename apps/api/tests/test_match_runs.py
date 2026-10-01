@@ -392,3 +392,34 @@ def test_run_task_is_registered_without_acks_late() -> None:
     task = celery_app.tasks["roleradar.match_run"]
     assert task.acks_late is False
     assert celery_app.conf.broker_transport_options["visibility_timeout"] >= 4 * 3600
+
+
+@pytest.mark.usefixtures("resume")
+async def test_deadline_leaves_remaining_jobs_unscored(session: AsyncSession) -> None:
+    from datetime import UTC, datetime, timedelta
+
+    for title in ("Data Scientist A", "Data Scientist B", "Data Scientist C"):
+        await add_job(session, title)
+    start_at = datetime(2026, 10, 2, 6, 0, tzinfo=UTC)
+    ticks = iter(start_at + timedelta(minutes=m) for m in range(0, 100, 7))
+
+    def clock() -> datetime:
+        return next(ticks)
+
+    run = await start(session)
+    await runs.execute_run(
+        session,
+        ScriptedProvider(),
+        run.id,
+        delays=[],
+        clock=clock,
+        deadline=start_at + timedelta(minutes=20),
+    )
+    await session.refresh(run)
+    assert run.status is RunStatus.DONE
+    done = [i for i in run.items if i.status is RunItemStatus.DONE]
+    skipped = [i for i in run.items if i.status is RunItemStatus.SKIPPED]
+    assert done and skipped
+    assert all(i.reason == runs.TIME_BUDGET_REACHED for i in skipped)
+    plan = await runs.plan_run(session, scope=RunScope.UNSCORED)
+    assert sorted(j.title for j in plan.to_score) == sorted(i.job_title for i in skipped)

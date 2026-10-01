@@ -1,0 +1,62 @@
+{
+  "id": "RklYVFVSRS1KT0ItMDAwMSA3",
+  "reference": "00000000-0000-4000-8000-0000000000e1",
+  "documentId": "00000000-0000-4000-8000-0000000000e1",
+  "connectionPointId": 7,
+  "source": "DK-STAR",
+  "creationDate": 1789724266616,
+  "lastModificationDate": 1789967582096,
+  "preferredLanguage": "da",
+  "jvProfiles": {
+    "da": {
+      "languageVersion": "da",
+      "title": "Senior Computer Vision & AI Engineer",
+      "numberOfPosts": 1,
+      "euresFlag": true,
+      "jobCategoriesCodes": [
+        "http://data.europa.eu/esco/occupation/258e46f9-0075-4a2e-adae-1ff0477e0f30"
+      ],
+      "positionOfferingCode": "directhire",
+      "positionScheduleCodes": [
+        "fulltime"
+      ],
+      "immediateStartIndicator": true,
+      "requiredSkills": [],
+      "workingLanguageCodes": [],
+      "description": "Do you want to build computer-vision technology for autonomous systems?<br><br>At Example Vision, we build autonomy software for unmanned systems.<br><br><b>What you will do</b><ul><li>Train and deploy perception models in PyTorch</li><li>Optimise models for edge devices</li></ul><b>Requirements</b><ul><li>5+ years of experience with computer vision</li><li>Fluent English</li></ul>",
+      "locations": [
+        {
+          "countryCode": "dk",
+          "region": "dk050",
+          "cityName": "Aalborg Øst",
+          "postalCode": "9220",
+          "addressLines": [],
+          "buildingAddress": {
+            "buildingNumber": "1",
+            "streetName": "Examplevej",
+            "unit": null
+          }
+        }
+      ],
+      "requiredExperiences": [],
+      "requiredDrivingLicenses": [],
+      "positionLanguages": [],
+      "employer": {
+        "name": "Example Vision ApS",
+        "legalID": "12345678",
+        "organisationSizeCode": null,
+        "organisationOwnershipTypeCode": null,
+        "website": "https://vision.example.com",
+        "sectorCodes": [],
+        "description": ""
+      },
+      "applicationInstructions": [
+        "Ansøg jobbet via:<br>Hjemmeside: <a href=\"https://careers.example.com/jobs/42-senior-cv-engineer\" rel=\"nofollow\">https://careers.example.com/jobs/42-senior-cv-engineer</a>"
+      ],
+      "personContacts": [],
+      "lastApplicationDate": 1794528000000
+    }
+  },
+  "translationType": "FIRST_LANGUAGE",
+  "translation": null
+}

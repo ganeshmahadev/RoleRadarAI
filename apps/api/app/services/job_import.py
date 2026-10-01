@@ -9,7 +9,7 @@ import logging
 import time
 import uuid
 from dataclasses import dataclass, replace
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import StrEnum
 from typing import Any
 
@@ -121,14 +121,46 @@ async def _resolve_company(
     return matches[0] if len(matches) == 1 else None
 
 
+async def _find_similar(
+    session: AsyncSession, company: Company | None, job: NormalizedJob, since: datetime
+) -> Job | None:
+    """Same company (linked, or same normalized employer name), title and location."""
+    employer_key = normalize_company_name(job.employer_name) if job.employer_name else ""
+    if company is None and not employer_key:
+        return None  # never merge jobs whose employer is unknown
+    location_key = normalize_text(job.location or "")
+    candidates = (
+        await session.execute(
+            select(Job).where(
+                Job.normalized_title == normalize_text(job.title), Job.created_at >= since
+            )
+        )
+    ).scalars()
+    for candidate in candidates:
+        if normalize_text(candidate.location or "") != location_key:
+            continue
+        if company is not None and candidate.company_id == company.id:
+            return candidate
+        same_employer = bool(candidate.employer_name) and (
+            normalize_company_name(candidate.employer_name or "") == employer_key
+        )
+        if company is None and candidate.company_id is None and same_employer:
+            return candidate
+    return None
+
+
 async def store_normalized(
     session: AsyncSession,
     normalized: NormalizedJob,
     *,
     raw_payload: dict[str, Any] | None,
     company_id: uuid.UUID | None = None,
+    similar_within_days: int | None = None,
     clock: Clock = utc_now,
 ) -> ImportResult:
+    """`similar_within_days` (discovery only): attach the posting to an existing job with the
+    same company, normalized title and location seen within that window, even when the
+    description differs (the same vacancy on another board). The existing text is kept."""
     now = clock()
     hash_ = content_hash(normalized)
     explicit_company = await _resolve_company(session, company_id, None) if company_id else None
@@ -164,6 +196,10 @@ async def store_normalized(
             _company_key(company, normalized), normalized.title, normalized.location, hash_
         )
         existing = await session.scalar(select(Job).where(Job.dedup_key == key))
+        if existing is None and similar_within_days is not None:
+            existing = await _find_similar(
+                session, company, normalized, now - timedelta(days=similar_within_days)
+            )
         if existing is not None:
             job = existing
             outcome = ImportOutcome.ATTACHED_SOURCE

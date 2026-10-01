@@ -28,6 +28,11 @@ class SourceType(StrEnum):
     ASHBY = "ashby"
     GENERIC_HTML = "generic_html"
     MANUAL = "manual"
+    # Automated discovery (PRD §84)
+    INDEED = "indeed"
+    LINKEDIN = "linkedin"
+    GOOGLE = "google"
+    EURES = "eures"
 
 
 class JobStatus(StrEnum):

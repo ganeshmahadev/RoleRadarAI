@@ -10,6 +10,7 @@ import uuid
 from collections import Counter
 from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass
+from datetime import datetime
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -41,6 +42,7 @@ FINISHED_ITEMS = (
     RunItemStatus.FAILED,
 )
 MAX_JOBS_PER_RUN = 500
+TIME_BUDGET_REACHED = "Time budget reached; scored first next time"
 Sleep = Callable[[float], Awaitable[None]]
 
 
@@ -212,7 +214,10 @@ async def execute_run(
     delays: Sequence[float],
     sleep: Sleep = asyncio.sleep,
     clock: Clock = utc_now,
+    deadline: datetime | None = None,
 ) -> MatchRun | None:
+    """`deadline` (daily discovery budget): jobs not started by then are SKIPPED and stay
+    unscored, so the next run scores them first."""
     run = await session.get(MatchRun, run_id)
     if run is None or run.status is not RunStatus.QUEUED:
         return run
@@ -227,6 +232,10 @@ async def execute_run(
         if run.status is RunStatus.CANCELLED:
             for rest in pending[index:]:
                 _finish(rest, RunItemStatus.SKIPPED, clock, reason="Run cancelled")
+            break
+        if deadline is not None and clock() >= deadline:
+            for rest in pending[index:]:
+                _finish(rest, RunItemStatus.SKIPPED, clock, reason=TIME_BUDGET_REACHED)
             break
         item.status, item.started_at = RunItemStatus.RUNNING, clock()
         run.current_job_id = item.job_id
