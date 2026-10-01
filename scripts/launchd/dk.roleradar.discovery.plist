@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Template: scripts/install-daily-discovery.sh fills in __REPO__, __HOUR__, __MINUTE__. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>dk.roleradar.discovery</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>__REPO__/scripts/daily-discovery.sh</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>__HOUR__</integer>
+    <key>Minute</key>
+    <integer>__MINUTE__</integer>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>/tmp/dk.roleradar.discovery.out</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/dk.roleradar.discovery.err</string>
+</dict>
+</plist>

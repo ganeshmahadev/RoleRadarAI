@@ -172,6 +172,11 @@ DATABASE_URL=$TEST_DB uv run alembic downgrade base && DATABASE_URL=$TEST_DB uv 
 uv run uvicorn app.main:app --reload --port 8000
 uv run celery -A app.workers.celery_app worker --loglevel=INFO
 uv run python -m app.commands.import_siri ../../data/siri_certified_companies_eures_queue.xlsx  # idempotent seed
+
+# automated discovery (PRD §84, opt-in via .env flags; run from repo root)
+DRY_RUN=1 scripts/daily-discovery.sh          # readiness check only; log ~/Library/Logs/roleradar-discovery.log
+scripts/daily-discovery.sh                    # one scheduled run: start OpenJev, search, score, stop OpenJev
+scripts/install-daily-discovery.sh HH:MM      # launchd daily job (only with the human's chosen time); --uninstall
 uv run ruff check . && uv run ruff format --check .
 uv run mypy                            # strict
 uv run pytest                          # uses Postgres db `roleradar_test` (auto-created, rebuilt from migrations)

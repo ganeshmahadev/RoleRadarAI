@@ -5,7 +5,11 @@ COPY --from=ghcr.io/astral-sh/uv:0.9 /uv /usr/local/bin/uv
 
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-dev --no-install-project
+# git is needed only to fetch python-jobspy from GitHub (pinned commit; the PyPI release
+# breaks on Python 3.13), so it is removed again in the same layer.
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && uv sync --frozen --no-dev --no-install-project \
+    && apt-get purge -y git && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 ENV PATH="/opt/venv/bin:$PATH"
 
 COPY . .

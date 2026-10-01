@@ -889,7 +889,9 @@ Exact next step after unblock: save sanitized search/detail fixtures under `apps
 
 ## P14-008 — Daily automation (script + launchd; install only after the user picks a time)
 
-**Status:** TODO
+**Status:** VERIFYING — `scripts/daily-discovery.sh` (Docker up → API health → settings check → start OpenJev if not running → `POST /discovery-runs {"trigger":"scheduled"}` → poll each minute, cancel at 70 min → stop OpenJev only if it started it; log `~/Library/Logs/roleradar-discovery.log`; `DRY_RUN=1` checks readiness only). `scripts/launchd/dk.roleradar.discovery.plist` template + `scripts/install-daily-discovery.sh HH:MM | --uninstall`. Verified: `bash -n`, rendered plist passes `plutil -lint`, installer rejects bad times, dry run against the dev stack PASS. Fixed: the API image could not build because `python-jobspy` comes from Git and the image had no `git` (installed for `uv sync` only, purged in the same layer).
+
+Waiting on the human: (1) set `DISCOVERY_JOBSPY_ENABLED=true` / `EURES_SCRAPER_ENABLED=true` in `.env` and approve a first small live run (Indeed only, 10 results, then the other sources; EURES 3 companies); (2) pick the daily time, then run `scripts/install-daily-discovery.sh HH:MM`. Not installed yet.
 
 ---
 
@@ -1182,6 +1184,36 @@ Notes:
 ---
 
 # Overnight handoff
+
+## P14 run (latest)
+
+```text
+Last updated: 2026-10-02
+Last commit: see `git log -1` (P14-008); NOT pushed yet (P14 waits for the live check)
+Current branch: main
+Worktree: clean after the P14-008 commit
+Active phase: P14 automated discovery (runs before P8)
+Status: code complete; P14-008 VERIFYING (needs the human: live run + daily time)
+
+Completed this run:
+- P14-001 PRD §84 override (a778c3e), P14-002 EURES spike (4bdac9a, endpoints from the user),
+  P14-003/004/006 JobSpy discovery backend (3ab3f70), P14-005 EURES scan (0ebea5b),
+  P14-007 Discover page (a2a05b5), P14-008 daily script + launchd template (this commit)
+
+Validation:
+- backend: ruff, mypy strict, pytest (378) — PASS; migrations a2c571fad892, b38735ee6b41 round-tripped on roleradar_test only
+- frontend: lint, typecheck, test (56), build — PASS; pnpm test:e2e (21) — PASS
+- docker compose up -d --build — PASS; dev DB upgraded forward to b38735ee6b41 (982 companies intact)
+- scripts/daily-discovery.sh DRY_RUN=1 — PASS
+
+Not run: any live scraping (flags off by default; needs the human's go-ahead).
+
+Exact next action:
+1. With the human: enable flags in .env, restart api+worker, run one small live search
+   (/discover: Indeed only, results 10, total budget 15) and report blocked sources.
+2. Install the launchd job at the human's chosen time; push main after P14 is accepted.
+3. Then P8 application tracking.
+```
 
 ## P7 run (latest)
 
