@@ -1,10 +1,10 @@
 import uuid
 from dataclasses import dataclass, field
 
-from sqlalchemy import ColumnElement, Select, false, func, or_, select
+from sqlalchemy import ColumnElement, Select, exists, false, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Company, EuresStatus
+from app.models import Company, EuresStatus, Job
 from app.schemas.company import CompanySort
 from app.services.company_normalization import normalize_company_name
 
@@ -18,9 +18,10 @@ class CompanyFilters:
     eures_status: list[EuresStatus] = field(default_factory=list)
     checked: bool | None = None
     siri_certified: bool | None = None
+    has_jobs: bool | None = None
 
 
-def _escape_like(value: str) -> str:
+def escape_like(value: str) -> str:
     return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 
@@ -28,7 +29,7 @@ def _conditions(filters: CompanyFilters) -> list[ColumnElement[bool]]:
     conditions: list[ColumnElement[bool]] = []
     if filters.q and filters.q.strip():
         raw = filters.q.strip()
-        term = f"%{_escape_like(raw)}%"
+        term = f"%{escape_like(raw)}%"
         options: list[ColumnElement[bool]] = [
             Company.company_name.ilike(term, escape="\\"),
             Company.cvr.startswith(raw, autoescape=True),
@@ -36,7 +37,7 @@ def _conditions(filters: CompanyFilters) -> list[ColumnElement[bool]]:
         normalized = normalize_company_name(raw)
         if normalized:
             options.append(
-                Company.normalized_name.like(f"%{_escape_like(normalized)}%", escape="\\")
+                Company.normalized_name.like(f"%{escape_like(normalized)}%", escape="\\")
             )
         conditions.append(or_(*options))
     if filters.eures_status:
@@ -47,6 +48,9 @@ def _conditions(filters: CompanyFilters) -> list[ColumnElement[bool]]:
         conditions.append(Company.eures_status.in_(UNCHECKED_STATUSES))
     if filters.siri_certified is not None:
         conditions.append(Company.siri_certified.is_(filters.siri_certified))
+    if filters.has_jobs is not None:
+        has = exists().where(Job.company_id == Company.id)
+        conditions.append(has if filters.has_jobs else ~has)
     return conditions or [~false()]
 
 

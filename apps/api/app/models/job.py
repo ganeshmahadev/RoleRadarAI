@@ -12,11 +12,13 @@ from sqlalchemy import (
     UniqueConstraint,
     false,
     func,
+    select,
 )
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, column_property, mapped_column, relationship
 
 from app.db.base import Base
+from app.models.company import Company
 
 
 class SourceType(StrEnum):
@@ -89,6 +91,7 @@ class Job(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
+    company: Mapped[Company | None] = relationship(lazy="selectin")
     sources: Mapped[list["JobSource"]] = relationship(
         back_populates="job",
         cascade="all, delete-orphan",
@@ -122,3 +125,12 @@ class JobSource(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     job: Mapped[Job] = relationship(back_populates="sources")
+
+
+# Number of canonical jobs linked to a company ("Jobs found", PRD §23).
+Company.jobs_count = column_property(  # type: ignore[assignment]
+    select(func.count(Job.id))
+    .where(Job.company_id == Company.id)
+    .correlate_except(Job)
+    .scalar_subquery()
+)

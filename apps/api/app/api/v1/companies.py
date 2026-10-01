@@ -23,12 +23,17 @@ async def list_companies(
     eures_status: Annotated[list[EuresStatus] | None, Query()] = None,
     checked: Annotated[bool | None, Query(description="EURES review reached an outcome")] = None,
     siri_certified: bool | None = None,
+    has_jobs: bool | None = None,
     sort: CompanySort = "position",
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=200)] = 50,
 ) -> Page[CompanyRead]:
     filters = CompanyFilters(
-        q=q, eures_status=eures_status or [], checked=checked, siri_certified=siri_certified
+        q=q,
+        eures_status=eures_status or [],
+        checked=checked,
+        siri_certified=siri_certified,
+        has_jobs=has_jobs,
     )
     items, total = await company_service.list_companies(
         session, filters, page=page, page_size=page_size, sort=sort

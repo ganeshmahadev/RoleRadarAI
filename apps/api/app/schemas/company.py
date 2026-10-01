@@ -28,5 +28,6 @@ class CompanyRead(BaseModel):
     careers_url: str | None
     ats_provider: str | None
     active: bool
+    jobs_count: int
     created_at: datetime
     updated_at: datetime

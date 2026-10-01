@@ -12,7 +12,7 @@
 
 ```text
 Active phase: P4 — Job-source connectors
-Active item: P4-009
+Active item: P4-010
 Last known-good commit: P3-002 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
@@ -448,7 +448,7 @@ Completion commit: `89b5418`
 
 ## P4-005 — Implement Greenhouse connector
 
-**Status:** DONE (with P4-006/P4-007 in one commit; hash recorded in P4-009)  
+**Status:** DONE (with P4-006/P4-007 in one commit `150ea80`)  
 **Depends on:** P4-003
 
 Verified 2026-10-01 (live probe, read-only): `GET https://boards-api.greenhouse.io/v1/boards/{board}/jobs/{id}` (content is HTML-escaped). Hosted URLs `job-boards.greenhouse.io/{board}/jobs/{id}` (and legacy `boards.greenhouse.io`). `boards-api.eu.greenhouse.io` does not resolve → EU-hosted boards fall back to the employer-page connector. Company-site URLs with `?gh_jid=` have no board token → employer-page connector.
@@ -490,7 +490,7 @@ Completion commit: `9b93073`
 
 ## P4-009 — Implement job normalization/deduplication
 
-**Status:** TODO
+**Status:** DONE
 
 ### Dedup inputs
 
@@ -500,6 +500,18 @@ normalized title
 location
 content hash
 ```
+
+- [x] `app/services/job_import.py`: content hash (normalized title/employer/location + whitespace-collapsed description), `dedup_key` per PRD §27 (company key = linked company's normalized name, else normalized employer name);
+- [x] outcomes: created / attached_source (same vacancy, new URL) / unchanged / update_pending (PENDING snapshot; accept/reject endpoints, 409 on duplicate);
+- [x] company link: explicit `company_id` → link + `JOB_FOUND` + last_checked; otherwise exact normalized employer match only (single match), status untouched;
+- [x] manual JD paste (`/jobs/import-text`; reference URLs validated, EURES rejected);
+- [x] `/jobs` list/detail/delete; `Company.jobs_count`; `has_jobs` filter; structured SourceError responses;
+- [x] structured log events `job_import_started|completed|failed` with duration;
+- [x] tests (19; 169 backend total).
+
+Note: imports run synchronously in the request (target < 10 s); Celery batching is P7.
+
+Completion commit: this commit; hash recorded in P4-010.
 
 ---
 

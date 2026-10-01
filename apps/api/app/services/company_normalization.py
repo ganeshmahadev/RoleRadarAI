@@ -21,12 +21,16 @@ EURES_SEARCH_URL_TEMPLATE = (
 )
 
 
-def normalize_company_name(name: str) -> str:
-    """Lowercase, legal suffix removed, accents folded (å→a; ø/æ kept), punctuation → space."""
-    stripped = _LEGAL_SUFFIX.sub("", name).strip()
-    decomposed = unicodedata.normalize("NFKD", stripped)
+def normalize_text(value: str) -> str:
+    """Lowercase, accents folded (å→a; ø/æ kept), punctuation → space, whitespace collapsed."""
+    decomposed = unicodedata.normalize("NFKD", value)
     folded = "".join(ch for ch in decomposed if not unicodedata.combining(ch)).lower()
     return _WHITESPACE.sub(" ", _NON_NAME_CHARS.sub(" ", folded)).strip()
+
+
+def normalize_company_name(name: str) -> str:
+    """normalize_text() after removing the legal-form suffix (A/S, ApS, ...)."""
+    return normalize_text(_LEGAL_SUFFIX.sub("", name).strip())
 
 
 def build_eures_search_url(company_name: str) -> str:

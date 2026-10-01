@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 from enum import StrEnum
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, DateTime, Enum, Integer, Text, func, true
 from sqlalchemy.orm import Mapped, mapped_column
@@ -61,3 +62,7 @@ class Company(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+    if TYPE_CHECKING:
+        # column_property defined in app/models/job.py (needs the Job table)
+        jobs_count: int

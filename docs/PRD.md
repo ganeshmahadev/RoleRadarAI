@@ -1917,6 +1917,20 @@ PATCH /jobs/{id}
 DELETE /jobs/{id}
 ```
 
+As implemented in P4 (2026-10-01):
+
+```http
+POST   /jobs/import-url        { url, company_id? } → { outcome, job }
+POST   /jobs/import-text       { title, description, employer_name?, location?, source_url?, apply_url?, company_id? }
+GET    /jobs?company_id=&q=&page=&page_size=
+GET    /jobs/{id}              includes source snapshots
+DELETE /jobs/{id}
+POST   /jobs/{id}/sources/{source_id}/accept   apply a PENDING snapshot (409 if not pending / duplicate)
+POST   /jobs/{id}/sources/{source_id}/reject
+```
+
+`outcome` ∈ `created | attached_source | unchanged | update_pending`. Import errors are `{"detail": {"code", "message", "retryable"}}` with codes `INVALID_URL`, `BLOCKED_URL`, `EURES_NOT_ALLOWED`, `ROBOTS_DISALLOWED`, `FETCH_FAILED`, `RESPONSE_TOO_LARGE`, `UNSUPPORTED_SOURCE`, `EXTRACTION_FAILED`. `PATCH /jobs/{id}` (save/ignore) arrives in P6. `GET /companies` gains `has_jobs`, and companies expose `jobs_count`.
+
 ---
 
 ## Matching
