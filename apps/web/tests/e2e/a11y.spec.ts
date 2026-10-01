@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-for (const path of ["/", "/companies", "/eures", "/jobs", "/settings/profile"]) {
+for (const path of ["/", "/companies", "/eures", "/jobs", "/matches", "/settings/profile"]) {
   test(`no WCAG A/AA violations on ${path}`, async ({ page }) => {
     await page.goto(path);
     await page.waitForLoadState("networkidle");

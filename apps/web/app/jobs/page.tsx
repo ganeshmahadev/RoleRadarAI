@@ -11,8 +11,8 @@ export default function JobsPage() {
       <header>
         <h1 className="text-xl font-semibold tracking-tight">Jobs</h1>
         <p className="text-sm text-muted">
-          Vacancies imported from their original employer or ATS source. Matching arrives in a later
-          phase.
+          Vacancies imported from their original employer or ATS source. Open a job to score it
+          against your resume; the Matches page ranks scored jobs.
         </p>
       </header>
       <Suspense fallback={<p className="text-sm text-muted">Loading jobs…</p>}>

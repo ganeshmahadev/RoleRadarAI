@@ -1,10 +1,15 @@
 """HTTP fake of the OpenJev server for the E2E stack: `python -m tests.fake_openjev_server PORT`.
 
-Scenario: strong fit, a stated mandatory language the candidate does not meet (blocker) and a
-stated years-of-experience requirement that is met.
+Default scenario: strong fit, a stated mandatory language the candidate does not meet (blocker)
+and a stated years-of-experience requirement that is met.
+
+Marker scenario (for ranking tests): a vacancy containing `FAKE_LEVEL=<0..4>` gets that level on
+every dimension and no stated requirements, plus a failed mandatory language if it also contains
+`FAKE_BLOCK`.
 """
 
 import json
+import re
 import sys
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -20,6 +25,23 @@ FAKE = FakeOpenJev(
         "req_years_experience_met": 0.88,
     },
 )
+
+
+LEVEL = re.compile(r"FAKE_LEVEL=([0-4](?:\.\d+)?)")
+
+
+def answer(body: dict[str, object]) -> dict[str, object]:
+    state = str(body.get("state", ""))
+    marker = LEVEL.search(state)
+    if marker is None:
+        return FAKE.answer(body)
+    blocked = "FAKE_BLOCK" in state
+    fake = FakeOpenJev(
+        default_score=float(marker.group(1)),
+        default_yes=0.05,
+        yes={"req_language_stated": 0.95, "req_language_met": 0.03} if blocked else {},
+    )
+    return fake.answer(body)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -43,7 +65,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         body = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or b"{}")
         time.sleep(1.5)  # long enough for the UI to show the running state
-        self._send(200, FAKE.answer(body))
+        self._send(200, answer(body))
 
 
 if __name__ == "__main__":

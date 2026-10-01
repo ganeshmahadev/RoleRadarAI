@@ -56,7 +56,7 @@ export function MatchPanel({ jobId }: { jobId: string }) {
         <h2 id="match-title" className="text-sm font-semibold">
           Match Score
         </h2>
-        {match?.status === "DONE" && scoreButton("Check again")}
+        {match?.status === "DONE" && scoreButton(match.outdated ? "Score again" : "Check again")}
       </div>
 
       {score.isError && <ScoreError error={score.error} />}
@@ -81,6 +81,12 @@ export function MatchPanel({ jobId }: { jobId: string }) {
           <p className="text-danger">Scoring failed: {match.error_message ?? match.error_code}</p>
           {scoreButton("Score again")}
         </div>
+      )}
+      {match?.status === "DONE" && match.outdated && (
+        <p role="note" className="rounded border border-warning/40 p-2 text-sm text-warning">
+          Outdated: your resume, profile or this job changed since this score. Score again to update
+          it.
+        </p>
       )}
       {match?.status === "DONE" && <MatchResult match={match} />}
     </section>

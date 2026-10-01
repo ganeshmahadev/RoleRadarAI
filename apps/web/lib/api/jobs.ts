@@ -33,8 +33,33 @@ export const jobSummarySchema = z.object({
   published_at: z.string().nullable(),
   created_at: z.string(),
   source_update_pending: z.boolean(),
+  status: z.enum(["NEW", "SAVED", "IGNORED"]),
 });
 export type JobSummary = z.infer<typeof jobSummarySchema>;
+export type JobStatus = JobSummary["status"];
+export const JOB_STATUS_LABELS: Record<JobStatus, string> = {
+  NEW: "New",
+  SAVED: "Saved",
+  IGNORED: "Ignored",
+};
+
+export const matchSummarySchema = z.object({
+  id: z.string(),
+  overall_score: z.number(),
+  category: z.string(),
+  hard_blocker: z.boolean(),
+  missing_requirements: z.array(z.string()),
+  uncertain_requirements: z.array(z.string()),
+  completed_at: z.string().nullable(),
+});
+export type MatchSummary = z.infer<typeof matchSummarySchema>;
+
+export const jobListItemSchema = jobSummarySchema.extend({
+  match: matchSummarySchema.nullable(),
+  match_outdated: z.boolean(),
+  scoring: z.boolean(),
+});
+export type JobListItem = z.infer<typeof jobListItemSchema>;
 
 export const jobSourceSchema = z.object({
   id: z.string(),
@@ -89,7 +114,7 @@ export const MANUAL_PASTE_CODES = new Set([
 ]);
 
 export const jobPageSchema = z.object({
-  items: z.array(jobSummarySchema),
+  items: z.array(jobListItemSchema),
   total: z.number().int(),
   page: z.number().int(),
   page_size: z.number().int(),
@@ -112,12 +137,73 @@ export interface ManualJobInput {
 export const importJobText = (input: ManualJobInput) =>
   apiFetch("/jobs/import-text", importResponseSchema, json(input));
 
-export function listJobs(params: { companyId?: string; q?: string; page: number }) {
-  const qs = new URLSearchParams({ page: String(params.page), page_size: "50" });
-  if (params.companyId) qs.set("company_id", params.companyId);
-  if (params.q?.trim()) qs.set("q", params.q.trim());
-  return apiFetch(`/jobs?${qs}`, jobPageSchema);
+export type JobSort = "match" | "newest" | "company" | "title";
+export type BlockedMode = "last" | "mixed" | "exclude";
+export type StatusView = "active" | "all" | JobStatus;
+
+export interface JobQuery {
+  q: string;
+  location: string;
+  companyId: string;
+  source: SourceType | "";
+  status: StatusView;
+  siriOnly: boolean;
+  scoredOnly: boolean;
+  minScore: number | null;
+  category: string;
+  blocked: BlockedMode;
+  sort: JobSort;
+  page: number;
+  pageSize: number;
 }
+
+export const DEFAULT_JOB_QUERY: JobQuery = {
+  q: "",
+  location: "",
+  companyId: "",
+  source: "",
+  status: "active",
+  siriOnly: false,
+  scoredOnly: false,
+  minScore: null,
+  category: "",
+  blocked: "last",
+  sort: "newest",
+  page: 1,
+  pageSize: 50,
+};
+
+export function toJobApiParams(query: JobQuery): URLSearchParams {
+  const params = new URLSearchParams({
+    sort: query.sort,
+    blocked: query.blocked,
+    page: String(query.page),
+    page_size: String(query.pageSize),
+  });
+  if (query.q.trim()) params.set("q", query.q.trim());
+  if (query.location.trim()) params.set("location", query.location.trim());
+  if (query.companyId) params.set("company_id", query.companyId);
+  if (query.source) params.set("source_type", query.source);
+  if (query.status === "all")
+    for (const s of ["NEW", "SAVED", "IGNORED"]) params.append("status", s);
+  else if (query.status !== "active") params.set("status", query.status);
+  if (query.siriOnly) params.set("siri_only", "true");
+  if (query.scoredOnly) params.set("scored", "true");
+  if (query.minScore !== null) params.set("min_score", String(query.minScore));
+  if (query.category) params.set("category", query.category);
+  return params;
+}
+
+export const listJobs = (query: JobQuery) =>
+  apiFetch(`/jobs?${toJobApiParams(query)}`, jobPageSchema);
+
+export const countJobs = (params: Record<string, string>) =>
+  apiFetch(`/jobs?${new URLSearchParams({ ...params, page_size: "1" })}`, jobPageSchema).then(
+    (page) => page.total,
+  );
+
+export const updateJobStatus = (id: string, status: JobStatus) =>
+  apiFetch(`/jobs/${id}`, jobSchema, { method: "PATCH", body: JSON.stringify({ status }) });
 
 export const getJob = (id: string) => apiFetch(`/jobs/${id}`, jobSchema);
 

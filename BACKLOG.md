@@ -11,9 +11,9 @@
 ## Current state
 
 ```text
-Active phase: P6 — Ranked matching experience
-Active item: P6-001
-Last known-good commit: P5 (see Overnight handoff)
+Active phase: P6 complete — STOPPED for human review (next: P7 background/bulk processing)
+Active item: none
+Last known-good commit: P6 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
 Last updated: 2026-10-01
@@ -707,9 +707,11 @@ Plan (2026-10-02), implementation decisions (implementation-local, reversible):
 
 ## P6-001 — Build Jobs list
 
-**Status:** IN_PROGRESS
+**Status:** DONE (backend `591cc3d`; UI in the P6 UI commit)
 
-Backend done (commit: see P6-001 UI entry):
+- [x] `/jobs`: filter toolbar (role/company, location/country, status, min match, blocked mode, source, sort, SIRI only; URL state), columns Role, Company, Location, Source, Published, Match (score + category + outdated / scoring), Save/Ignore/Restore;
+
+Backend:
 - [x] `Job.status` NEW|SAVED|IGNORED + migration `1818d540c7c5` (explicit `ck_jobs_job_status`; round-trip on `roleradar_test` only); `PATCH /jobs/{id}` {status};
 - [x] `GET /jobs` returns each job's current Match (latest DONE for the primary resume, via `DISTINCT ON`), `match_outdated`, `scoring`; filters q (title/employer/company), location (location/city/country), company_id, source_type, siri_only, status (default NEW+SAVED), scored, min_score, blocked (last|mixed|exclude), category, update_pending; sorts match|newest|company|title;
 - [x] `MatchRead.outdated`;
@@ -719,7 +721,10 @@ Backend done (commit: see P6-001 UI entry):
 
 ## P6-002 — Build Matches list
 
-**Status:** TODO
+**Status:** DONE
+
+- [x] `/matches`: 20 per screen, ranked (#), Match, Role, Company, Location, Gaps (✗ missing / △ partial), actions; blocked below by default with "Rank by score" / "Hide"; category filter (`?cat=STRONG`) with a clear link; sidebar "Matches";
+- [x] acceptance (IMPLEMENTATION_PLAN §56): "What are the 20 strongest jobs I've found?" answered on one screen (E2E `ranking.spec.ts`).
 
 Support:
 
@@ -736,7 +741,9 @@ saved/applied status
 
 ## P6-004 — Dashboard
 
-**Status:** TODO
+**Status:** DONE
+
+- [x] Tiles: SIRI companies, companies checked, active jobs, scored jobs, strong matches (stored category, links to `/matches?cat=STRONG`), saved jobs; Top matches (5), Recently discovered (5), Needs review (unscored, changed postings, companies left on EURES); counts reuse `/eures/stats` and `/jobs` totals (no new endpoint).
 
 PRD §33, limited to existing data (see plan above).
 
@@ -744,7 +751,15 @@ PRD §33, limited to existing data (see plan above).
 
 ## P6-003 — Build Job detail / evidence screen
 
-**Status:** TODO
+**Status:** DONE (evidence panel from P5-007, plus:)
+
+- [x] Save / Ignore / Restore and a status badge on the job page; "Outdated" notice with "Score again" when inputs changed;
+- [x] tests: Vitest 7 new (48 total); Playwright `ranking.spec.ts` (blocked last / mixed / hidden, save, ignore, restore, dashboard tiles + strong-matches link, outdated after a profile edit) + axe on `/matches` (18 total). Fake OpenJev gained `FAKE_LEVEL=` / `FAKE_BLOCK` markers.
+- [x] a11y fix found by axe: inline link in the Matches empty state was colour-only (now underlined).
+
+### P6 phase exit (2026-10-02)
+
+All P6 items DONE. Dashboard, jobs table, matches table, job details, filters, sorting, saved and ignored jobs work; the 20 strongest jobs fit on one screen. Applied / Not applied filters wait for P8 application tracking.
 
 Display:
 
@@ -1095,7 +1110,31 @@ Notes:
 
 # Overnight handoff
 
-## P5 run (latest)
+## P6 run (latest)
+
+```text
+Last updated: 2026-10-02
+Last commit: see `git log -1`; pushed to origin/main with this phase
+Current branch: main
+Worktree: clean
+Active phase: none — P0, P1, P3, P4, P2, P5, P6 complete
+Status: STOPPED for human review
+
+Completed this run:
+- P6-001 backend: job status, ranked listing, outdated detection (591cc3d)
+- P6-001..004 UI: jobs table, matches page, status actions, outdated notice, dashboard (this commit)
+
+Validation (end of P6):
+- backend: ruff, ruff format --check, mypy strict, pytest (316) — PASS
+- migration 1818d540c7c5: round-trip on roleradar_test; dev DB upgraded only (982 companies, user's resume intact)
+- frontend: prettier, lint, typecheck, test (48), build — PASS; pnpm test:e2e (18) — PASS
+
+Exact next action (after human approval):
+1. P7: bulk scoring ("score all unscored", sequential through Celery, relevance filter PRD §28 using profile target roles),
+   SSE progress, retry classification (P7-004).
+```
+
+## P5 run
 
 ```text
 Last updated: 2026-10-02

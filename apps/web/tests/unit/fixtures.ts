@@ -1,5 +1,5 @@
 import type { Company, CompanyPage } from "@/lib/api/companies";
-import type { Job } from "@/lib/api/jobs";
+import type { Job, JobListItem } from "@/lib/api/jobs";
 import type { Match } from "@/lib/api/matches";
 import type { Profile, Resume } from "@/lib/api/resumes";
 
@@ -54,6 +54,7 @@ export function makeJob(overrides: Partial<Job> = {}): Job {
     published_at: "2026-09-03T17:30:34Z",
     created_at: "2026-10-01T10:00:00Z",
     source_update_pending: false,
+    status: "NEW",
     description: "About the role\n\nBuild LLM-powered tools.",
     country: null,
     city: null,
@@ -160,6 +161,38 @@ export function makeMatch(overrides: Partial<Match> = {}): Match {
     started_at: "2026-10-02T10:00:01Z",
     completed_at: "2026-10-02T10:02:00Z",
     duration_ms: 119000,
+    outdated: false,
+    ...overrides,
+  };
+}
+
+export function makeJobItem(overrides: Partial<JobListItem> = {}): JobListItem {
+  const { sources: _sources, description: _d, ...summary } = makeJob();
+  void _sources;
+  void _d;
+  return {
+    id: summary.id,
+    title: summary.title,
+    employer_name: summary.employer_name,
+    company: summary.company,
+    location: summary.location,
+    source_type: summary.source_type,
+    source_url: summary.source_url,
+    published_at: summary.published_at,
+    created_at: summary.created_at,
+    source_update_pending: false,
+    status: "NEW",
+    match: {
+      id: "50000000-0000-4000-8000-000000000001",
+      overall_score: 90.2,
+      category: "STRONG",
+      hard_blocker: false,
+      missing_requirements: [],
+      uncertain_requirements: [],
+      completed_at: "2026-10-02T10:00:00Z",
+    },
+    match_outdated: false,
+    scoring: false,
     ...overrides,
   };
 }

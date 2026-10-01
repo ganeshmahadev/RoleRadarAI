@@ -6,8 +6,17 @@ import { useRouter } from "next/navigation";
 
 import { buttonClass, primaryButtonClass } from "@/components/ui/styles";
 import { MatchPanel } from "@/features/matches/match-panel";
+
+import { JobStatusActions } from "./job-status-actions";
 import { ApiError } from "@/lib/api/client";
-import { deleteJob, getJob, reviewSource, SOURCE_TYPE_LABELS, type Job } from "@/lib/api/jobs";
+import {
+  deleteJob,
+  getJob,
+  JOB_STATUS_LABELS,
+  reviewSource,
+  SOURCE_TYPE_LABELS,
+  type Job,
+} from "@/lib/api/jobs";
 import { formatDate, formatDateTime } from "@/lib/format";
 
 const isWebUrl = (url: string) => url.startsWith("https://") || url.startsWith("http://");
@@ -75,7 +84,14 @@ export function JobDetail({ jobId }: { jobId: string }) {
         <Link href="/jobs" className="text-xs text-accent hover:underline">
           ← Jobs
         </Link>
-        <h1 className="text-xl font-semibold tracking-tight">{job.title}</h1>
+        <h1 className="text-xl font-semibold tracking-tight">
+          {job.title}
+          {job.status !== "NEW" && (
+            <span className="ml-2 align-middle rounded border border-border px-1.5 py-0.5 text-xs font-normal text-muted">
+              {JOB_STATUS_LABELS[job.status]}
+            </span>
+          )}
+        </h1>
         <div className="flex flex-wrap gap-2 pt-1">
           {job.apply_url && isWebUrl(job.apply_url) && (
             <a
@@ -92,6 +108,7 @@ export function JobDetail({ jobId }: { jobId: string }) {
               All jobs at {job.company.company_name}
             </Link>
           )}
+          <JobStatusActions jobId={job.id} title={job.title} status={job.status} />
           <button
             type="button"
             className={buttonClass}

@@ -53,6 +53,7 @@ export const matchSchema = z.object({
   started_at: z.string().nullable(),
   completed_at: z.string().nullable(),
   duration_ms: z.number().int().nullable(),
+  outdated: z.boolean(),
 });
 export type Match = z.infer<typeof matchSchema>;
 
