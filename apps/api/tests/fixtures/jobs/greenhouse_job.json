@@ -1,0 +1,36 @@
+{
+  "id": 7001001,
+  "internal_job_id": 3001,
+  "title": "Applied AI Engineer",
+  "company_name": "Example Fintech",
+  "location": {
+    "name": "Copenhagen, Denmark"
+  },
+  "first_published": "2026-09-03T13:30:34-04:00",
+  "updated_at": "2026-09-25T16:45:00-04:00",
+  "application_deadline": null,
+  "absolute_url": "https://job-boards.greenhouse.io/examplefintech/jobs/7001001",
+  "requisition_id": "R-77",
+  "language": "en",
+  "metadata": null,
+  "data_compliance": [],
+  "education": "education_optional",
+  "departments": [
+    {
+      "id": 1,
+      "name": "Engineering",
+      "child_ids": [],
+      "parent_id": null
+    }
+  ],
+  "offices": [
+    {
+      "id": 2,
+      "name": "Copenhagen",
+      "location": "Copenhagen, Denmark",
+      "child_ids": [],
+      "parent_id": null
+    }
+  ],
+  "content": "&lt;h2&gt;About the role&lt;/h2&gt;&lt;p&gt;Build LLM-powered tools for &lt;strong&gt;payments&lt;/strong&gt; risk teams.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Python &amp;amp; FastAPI&lt;/li&gt;&lt;li&gt;Retrieval-augmented generation&lt;/li&gt;&lt;/ul&gt;"
+}

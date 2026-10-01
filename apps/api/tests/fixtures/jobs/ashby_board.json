@@ -1,0 +1,47 @@
+{
+  "apiVersion": "1",
+  "jobs": [
+    {
+      "id": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+      "title": "Senior Data Engineer",
+      "department": "Engineering",
+      "team": "Platform",
+      "employmentType": "FullTime",
+      "location": "Copenhagen",
+      "secondaryLocations": [
+        {
+          "location": "Remote - Denmark",
+          "address": {
+            "postalAddress": {
+              "addressCountry": "Denmark"
+            }
+          }
+        }
+      ],
+      "isRemote": false,
+      "workplaceType": "Hybrid",
+      "isListed": true,
+      "publishedAt": "2026-09-10T09:00:00.000+00:00",
+      "jobUrl": "https://jobs.ashbyhq.com/exampleco/aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+      "applyUrl": "https://jobs.ashbyhq.com/exampleco/aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee/application",
+      "address": {
+        "postalAddress": {
+          "addressCountry": "Denmark",
+          "addressLocality": "Copenhagen",
+          "addressRegion": ""
+        }
+      },
+      "descriptionHtml": "<p>Own our streaming data platform.</p>",
+      "descriptionPlain": "Own our streaming data platform built on Kafka and dbt.",
+      "compensation": null,
+      "shouldDisplayCompensationOnJobPostings": false
+    },
+    {
+      "id": "99999999-8888-4777-8666-555555555555",
+      "title": "Unlisted role",
+      "isListed": false,
+      "descriptionPlain": "hidden",
+      "jobUrl": "https://jobs.ashbyhq.com/exampleco/99999999-8888-4777-8666-555555555555"
+    }
+  ]
+}

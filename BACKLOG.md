@@ -12,7 +12,7 @@
 
 ```text
 Active phase: P4 — Job-source connectors
-Active item: P4-005
+Active item: P4-009
 Last known-good commit: P3-002 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
@@ -448,7 +448,7 @@ Completion commit: `89b5418`
 
 ## P4-005 — Implement Greenhouse connector
 
-**Status:** TODO  
+**Status:** DONE (with P4-006/P4-007 in one commit; hash recorded in P4-009)  
 **Depends on:** P4-003
 
 Verified 2026-10-01 (live probe, read-only): `GET https://boards-api.greenhouse.io/v1/boards/{board}/jobs/{id}` (content is HTML-escaped). Hosted URLs `job-boards.greenhouse.io/{board}/jobs/{id}` (and legacy `boards.greenhouse.io`). `boards-api.eu.greenhouse.io` does not resolve → EU-hosted boards fall back to the employer-page connector. Company-site URLs with `?gh_jid=` have no board token → employer-page connector.
@@ -457,7 +457,7 @@ Verified 2026-10-01 (live probe, read-only): `GET https://boards-api.greenhouse.
 
 ## P4-006 — Implement Lever connector
 
-**Status:** TODO  
+**Status:** DONE (see P4-005)  
 **Depends on:** P4-003
 
 Verified 2026-10-01: `GET https://api.lever.co/v0/postings/{site}/{id}` (EU: `api.eu.lever.co`); hosted `jobs.lever.co/{site}/{id}` / `jobs.eu.lever.co`.
@@ -466,10 +466,12 @@ Verified 2026-10-01: `GET https://api.lever.co/v0/postings/{site}/{id}` (EU: `ap
 
 ## P4-007 — Implement Ashby connector
 
-**Status:** TODO  
+**Status:** DONE (see P4-005)  
 **Depends on:** P4-003
 
 Verified 2026-10-01: `GET https://api.ashbyhq.com/posting-api/job-board/{org}?includeCompensation=true` (board-level only; filter by job id); hosted `jobs.ashbyhq.com/{org}/{id}`.
+
+P4-005..007 result: `app/connectors/ats.py`; sanitized fixtures `greenhouse_job.json`, `lever_job.json`, `ashby_board.json` (real field shapes, invented content); 15 tests. Lever and Ashby APIs do not state the employer name, so `employer_name` stays None and company linking relies on import context. Compensation is not parsed (stored in the raw payload only).
 
 ---
 
@@ -482,7 +484,7 @@ Verified 2026-10-01: `GET https://api.ashbyhq.com/posting-api/job-board/{org}?in
 - [x] < 200 chars or no title → `EXTRACTION_FAILED` (manual paste); location never guessed from free text;
 - [x] fixtures `generic_page.html`, `generic_too_short.html`; tests (2).
 
-Completion commit: this commit; hash recorded in P4-005.
+Completion commit: `9b93073`
 
 ---
 

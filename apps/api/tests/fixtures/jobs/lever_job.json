@@ -1,0 +1,36 @@
+{
+  "id": "11111111-2222-4333-8444-555555555555",
+  "text": "Machine Learning Engineer",
+  "country": "DK",
+  "workplaceType": "hybrid",
+  "categories": {
+    "commitment": "Full-time",
+    "location": "Aarhus",
+    "team": "Data",
+    "allLocations": [
+      "Aarhus",
+      "Copenhagen"
+    ]
+  },
+  "createdAt": 1758000000000,
+  "hostedUrl": "https://jobs.lever.co/examplecorp/11111111-2222-4333-8444-555555555555",
+  "applyUrl": "https://jobs.lever.co/examplecorp/11111111-2222-4333-8444-555555555555/apply",
+  "description": "<div>We are building forecasting models for wind farms.</div>",
+  "descriptionPlain": "We are building forecasting models for wind farms.",
+  "opening": "",
+  "openingPlain": "",
+  "descriptionBody": "",
+  "descriptionBodyPlain": "",
+  "lists": [
+    {
+      "text": "What you'll do",
+      "content": "<li>Train time-series models</li><li>Deploy with MLflow</li>"
+    },
+    {
+      "text": "Requirements",
+      "content": "<li>PhD or MSc in ML</li>"
+    }
+  ],
+  "additional": "<div>We sponsor work permits where eligible.</div>",
+  "additionalPlain": "We sponsor work permits where eligible."
+}
