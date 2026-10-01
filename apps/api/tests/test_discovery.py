@@ -217,16 +217,6 @@ async def test_rerun_finds_nothing_new_and_skips_scoring(session: AsyncSession) 
 
 
 @pytest.mark.usefixtures("enabled", "resume")
-async def test_eures_reported_unavailable_until_confirmed(
-    session: AsyncSession, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setattr(get_settings(), "eures_scraper_enabled", True)
-    run = await run_discovery(session, FakeJobSpyClient(), eures_enabled=True)
-    eures = next(s for s in run.sources if s["source"] == "eures")
-    assert eures["status"] == "unavailable"
-
-
-@pytest.mark.usefixtures("enabled", "resume")
 async def test_scrape_budget_skips_remaining_searches(session: AsyncSession) -> None:
     row = await discovery.get_settings_row(session)
     await discovery.update_settings(session, row, {"scrape_budget_minutes": 1})

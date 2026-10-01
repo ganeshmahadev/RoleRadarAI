@@ -855,7 +855,7 @@ Plan: `~/.claude-work/plans/okay-that-is-good-sequential-raccoon.md` (approved 2
 
 ## P14-002 — Spike: EURES endpoints, robots.txt, fixtures (OD-7)
 
-**Status:** BLOCKED (2026-10-02)
+**Status:** DONE (2026-10-02) — unblocked by the user, who captured the endpoints in their own browser: `POST /eures/api/jv-searchengine/public/jv-search/search` (payload + response shape) and `GET /eures/api/jv-searchengine/public/jv/id/{id}?requestLang=en&preferredLang=null`. Sanitized fixtures: `apps/api/tests/fixtures/eures/{search_request,search,detail}.json` (fictional employers). The detail's `employer.legalID` is the CVR.
 
 Found (3 polite requests, 10 s apart): `europa.eu/robots.txt` does not disallow `/eures/` but sets **Crawl-delay: 10** for `*` → any scan must wait ≥ 10 s between requests. The search page (`/eures/portal/jv-se/search`) is an Angular SPA; its data endpoints are not in `main-*.js` / `jv-se.routes-*.js` (configured at runtime). No WAF/captcha seen on the HTML.
 
@@ -877,11 +877,11 @@ Exact next step after unblock: save sanitized search/detail fixtures under `apps
 
 ## P14-005 — EURES scan source (per company, rotation, status updates)
 
-**Status:** BLOCKED — depends on P14-002 (OD-7). Must honour Crawl-delay 10 s.
+**Status:** DONE — `app/discovery/eures_scan.py` (`EuresClient`: ≥ 10 s between requests, floor enforced even if the env sets less; honest User-Agent; 403/429/non-JSON → `EuresBlocked`, stops EURES for the run, company left untouched). Orchestrator EURES phase: (a) term search, up to 4 pages, recent only, detail per new vacancy, SIRI link by `legalID` = CVR; (b) rotating company scan (least recently checked first, `eures_companies_per_run`), exact employer-name filter + CVR check, `JOB_FOUND` / `CHECKED_NO_JOBS` with `Company.eures_checked_by = "scan"` (migration `b38735ee6b41`), notes never touched. Known vacancy ids skip the detail request. Duplicate national/English copies collapse to one. 14 tests (MockTransport, no network); 378 backend total.
 
 ## P14-006 — Discovery orchestrator, time budget, Celery task, API + SSE
 
-**Status:** IN_PROGRESS — backend done: `discovery_service` (scrape → EURES → score with deadlines; blocked board continues; one active run; guardrail errors), `execute_run(deadline=)`, Celery `roleradar.discovery_run` (not acks_late), inline queue, `/discovery/settings`, `/discovery-runs` (+cancel, SSE); 23 tests (364 backend total). EURES phase reports "unavailable" until P14-005.
+**Status:** IN_PROGRESS — backend done: `discovery_service` (scrape → EURES → score with deadlines; blocked board continues; one active run; guardrail errors), `execute_run(deadline=)`, Celery `roleradar.discovery_run` (not acks_late), inline queue, `/discovery/settings`, `/discovery-runs` (+cancel, SSE); 23 tests (364 backend total). EURES phase live since P14-005. Remaining: frontend (P14-007).
 
 ## P14-007 — Discover page (settings, Search now, progress, results)
 

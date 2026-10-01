@@ -51,6 +51,8 @@ class Company(Base):
     )
     eures_last_checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     eures_notes: Mapped[str | None] = mapped_column(Text)
+    # Who recorded the last EURES outcome: "user" or "scan" (automated discovery, PRD §84).
+    eures_checked_by: Mapped[str | None] = mapped_column(Text)
 
     website_url: Mapped[str | None] = mapped_column(Text)
     careers_url: Mapped[str | None] = mapped_column(Text)

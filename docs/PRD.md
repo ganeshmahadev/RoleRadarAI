@@ -2782,7 +2782,7 @@ These are unresolved. Do not invent answers; resolve with the user before the li
 | OD-4 | ~~Dimension display format~~ | — | **Resolved 2026-10-02**: 0–100 everywhere, see §18 and §82. |
 | OD-5 | What happens to companies missing from a later SIRI list (keep, mark `siri_certified=false`, or `active=false`). | future SIRI refresh | Not needed for the one-time seed import. |
 | OD-6 | ~~How must-have requirements are obtained without an extractor~~ | — | **Resolved 2026-10-02**: fixed hard-requirement types with two OpenJev yes/no questions each, see §19 and §82. |
-| OD-7 | Which EURES endpoints the scan may call (JSON search + vacancy detail), and whether any WAF/captcha/login blocks automation. | P14-005 | **Partly answered 2026-10-02:** robots.txt allows `/eures/` with **Crawl-delay: 10** (scan must wait ≥ 10 s between requests); the SPA's data endpoints are still unknown (spike blocked, see BACKLOG P14-002). Needs the user's input. |
+| OD-7 | Which EURES endpoints the scan may call (JSON search + vacancy detail), and whether any WAF/captcha/login blocks automation. | P14-005 | **Answered 2026-10-02:** robots.txt allows `/eures/` with **Crawl-delay: 10** (scan waits ≥ 10 s between requests). Endpoints supplied by the user from their browser: `POST …/jv-searchengine/public/jv-search/search` and `GET …/jv-searchengine/public/jv/id/{id}`; no login needed. `employer.legalID` in the detail is the CVR. |
 
 ---
 

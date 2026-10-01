@@ -5,6 +5,7 @@ import uuid
 
 from app.core.config import get_settings
 from app.db.session import standalone_session
+from app.discovery.eures_scan import EuresClient
 from app.discovery.jobspy_source import JobSpyClient, LiveJobSpyClient
 from app.providers.decision import DecisionUnavailable
 from app.providers.factory import get_decision_provider
@@ -55,6 +56,18 @@ def jobspy_client() -> JobSpyClient | None:
     return LiveJobSpyClient()
 
 
+def eures_client() -> EuresClient | None:
+    """None unless EURES_SCRAPER_ENABLED (PRD §84 user override; off by default)."""
+    settings = get_settings()
+    if not settings.eures_scraper_enabled:
+        return None
+    if settings.discovery_sources == "fake":
+        from tests.fake_eures import handler  # offline fixtures for E2E
+
+        return EuresClient(crawl_delay=0, transport=handler())
+    return EuresClient(crawl_delay=max(settings.eures_crawl_delay_seconds, 10.0))
+
+
 async def execute_discovery_run(run_id: uuid.UUID) -> None:
     settings = get_settings()
     async with standalone_session() as session:
@@ -64,6 +77,7 @@ async def execute_discovery_run(run_id: uuid.UUID) -> None:
                 run_id,
                 client=jobspy_client(),
                 provider=get_decision_provider(),
+                eures=eures_client(),
                 delays=settings.match_retry_delays_seconds,
                 pause_seconds=settings.discovery_pause_seconds,
             )

@@ -1,0 +1,128 @@
+{
+  "numberRecords": 3,
+  "jvs": [
+    {
+      "title": "Senior Computer Vision & AI Engineer",
+      "description": "Do you want to build computer-vision technology for autonomous systems?<br><br><strong>What you will do</strong><ul><li>Train and deploy perception models in PyTorch</li><li>Optimise models for edge devices</li></ul><strong>Requirements</strong><ul><li>5+ years of experience with computer vision</li><li>Fluent English</li></ul>",
+      "id": "RklYVFVSRS1KT0ItMDAwMSA3",
+      "creationDate": 1790000000000,
+      "lastModificationDate": 1790000060000,
+      "numberOfPosts": 1,
+      "locationMap": {
+        "DK": [
+          "DK050"
+        ]
+      },
+      "euresFlag": true,
+      "jobCategoriesCodes": [
+        "http://data.europa.eu/esco/occupation/258e46f9-0075-4a2e-adae-1ff0477e0f30"
+      ],
+      "positionScheduleCodes": [
+        "fulltime"
+      ],
+      "positionOfferingCode": "directhire",
+      "employer": {
+        "name": "Example Vision ApS",
+        "legalID": null,
+        "organisationSizeCode": null,
+        "organisationOwnershipTypeCode": null,
+        "website": "https://vision.example.com",
+        "sectorCodes": [],
+        "description": null
+      },
+      "availableLanguages": [
+        "da"
+      ],
+      "score": null,
+      "translationType": "FIRST_LANGUAGE",
+      "translations": {
+        "da": {
+          "title": "Senior Computer Vision & AI Engineer",
+          "description": "Do you want to build computer-vision technology for autonomous systems?<br><br><strong>What you will do</strong><ul><li>Train and deploy perception models in PyTorch</li><li>Optimise models for edge devices</li></ul><strong>Requirements</strong><ul><li>5+ years of experience with computer vision</li><li>Fluent English</li></ul>"
+        }
+      }
+    },
+    {
+      "title": "Senior Computer Vision & AI Engineer",
+      "description": "Do you want to build computer-vision technology for autonomous systems?<br><br><strong>What you will do</strong><br>- Train and deploy perception models in PyTorch<br>- Optimise models for edge devices<strong>Requirements</strong><br>- 5+ years of experience with computer vision<br>- Fluent English<br><br>More information and application:<br><a href=\"https://careers.example.com/jobs/42-senior-cv-engineer\" target=\"_blank\" rel=\"nofollow\">https://careers.example.com/jobs/42-senior-cv-engineer</a>",
+      "id": "RklYVFVSRS1KT0ItMDAwMiAxMjE",
+      "creationDate": 1790003600000,
+      "lastModificationDate": 1790003660000,
+      "numberOfPosts": 1,
+      "locationMap": {
+        "DK": [
+          null
+        ]
+      },
+      "euresFlag": false,
+      "jobCategoriesCodes": [
+        "http://data.europa.eu/esco/occupation/258e46f9-0075-4a2e-adae-1ff0477e0f30"
+      ],
+      "positionScheduleCodes": [
+        "fulltime"
+      ],
+      "positionOfferingCode": "directhire",
+      "employer": {
+        "name": "Example Vision ApS",
+        "legalID": null,
+        "organisationSizeCode": null,
+        "organisationOwnershipTypeCode": null,
+        "website": null,
+        "sectorCodes": [],
+        "description": null
+      },
+      "availableLanguages": [
+        "en"
+      ],
+      "score": null,
+      "translationType": "REQUESTED",
+      "translations": {
+        "en": {
+          "title": "Senior Computer Vision & AI Engineer",
+          "description": "Do you want to build computer-vision technology for autonomous systems?<br><br><strong>What you will do</strong><br>- Train and deploy perception models in PyTorch<br>- Optimise models for edge devices<strong>Requirements</strong><br>- 5+ years of experience with computer vision<br>- Fluent English<br><br>More information and application:<br><a href=\"https://careers.example.com/jobs/42-senior-cv-engineer\" target=\"_blank\" rel=\"nofollow\">https://careers.example.com/jobs/42-senior-cv-engineer</a>"
+        }
+      }
+    },
+    {
+      "title": "AI Engineer",
+      "description": "<p>Build LLM features for our logistics platform with Python.</p><p>3+ years experience.</p>",
+      "id": "RklYVFVSRS1KT0ItMDAwMyAx",
+      "creationDate": 1789913600000,
+      "lastModificationDate": 1789913660000,
+      "numberOfPosts": 1,
+      "locationMap": {
+        "DK": [
+          "DK011"
+        ]
+      },
+      "euresFlag": true,
+      "jobCategoriesCodes": [
+        "http://data.europa.eu/esco/occupation/258e46f9-0075-4a2e-adae-1ff0477e0f30"
+      ],
+      "positionScheduleCodes": [
+        "fulltime"
+      ],
+      "positionOfferingCode": "directhire",
+      "employer": {
+        "name": "Other Robotics A/S",
+        "legalID": null,
+        "organisationSizeCode": null,
+        "organisationOwnershipTypeCode": null,
+        "website": null,
+        "sectorCodes": [],
+        "description": null
+      },
+      "availableLanguages": [
+        "en"
+      ],
+      "score": null,
+      "translationType": "FIRST_LANGUAGE",
+      "translations": {
+        "en": {
+          "title": "AI Engineer",
+          "description": "<p>Build LLM features for our logistics platform with Python.</p><p>3+ years experience.</p>"
+        }
+      }
+    }
+  ]
+}

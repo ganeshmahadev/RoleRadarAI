@@ -156,6 +156,7 @@ async def store_normalized(
     raw_payload: dict[str, Any] | None,
     company_id: uuid.UUID | None = None,
     similar_within_days: int | None = None,
+    checked_by: str = "user",
     clock: Clock = utc_now,
 ) -> ImportResult:
     """`similar_within_days` (discovery only): attach the posting to an existing job with the
@@ -216,6 +217,7 @@ async def store_normalized(
         # Importing from a company's EURES queue row completes that check (PRD §8).
         explicit_company.eures_status = EuresStatus.JOB_FOUND
         explicit_company.eures_last_checked_at = now
+        explicit_company.eures_checked_by = checked_by
 
     await session.commit()
     return ImportResult(job=await load_job(session, job.id), outcome=outcome)

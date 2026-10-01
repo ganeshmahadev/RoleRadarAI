@@ -24,6 +24,7 @@ class CompanyRead(BaseModel):
     eures_status: EuresStatus
     eures_last_checked_at: datetime | None
     eures_notes: str | None
+    eures_checked_by: str | None
     website_url: str | None
     careers_url: str | None
     ats_provider: str | None

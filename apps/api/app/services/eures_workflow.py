@@ -54,6 +54,7 @@ async def _complete(
 ) -> Company:
     company.eures_status = status
     company.eures_last_checked_at = clock()
+    company.eures_checked_by = "user"
     return await _save(session, company, event)
 
 
@@ -72,6 +73,7 @@ async def mark_error(session: AsyncSession, company: Company, clock: Clock = utc
 async def reset(session: AsyncSession, company: Company) -> Company:
     company.eures_status = EuresStatus.NOT_CHECKED
     company.eures_last_checked_at = None
+    company.eures_checked_by = None
     return await _save(session, company, "eures_reset")
 
 

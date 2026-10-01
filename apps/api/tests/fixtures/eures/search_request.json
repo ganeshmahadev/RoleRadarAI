@@ -1,0 +1,29 @@
+{
+  "resultsPerPage": 50,
+  "page": 1,
+  "sortSearch": "BEST_MATCH",
+  "keywords": [
+    {
+      "keyword": "AI Engineer",
+      "specificSearchCode": "EVERYWHERE"
+    }
+  ],
+  "publicationPeriod": "LAST_MONTH",
+  "occupationUris": [],
+  "skillUris": [],
+  "requiredExperienceCodes": [],
+  "positionScheduleCodes": [],
+  "sectorCodes": [],
+  "educationAndQualificationLevelCodes": [],
+  "positionOfferingCodes": [],
+  "locationCodes": [
+    "dk"
+  ],
+  "euresFlagCodes": [],
+  "otherBenefitsCodes": [],
+  "requiredLanguages": [],
+  "minNumberPost": null,
+  "sessionId": "example-session-id",
+  "requestLanguage": "en",
+  "userPreferredLanguage": null
+}

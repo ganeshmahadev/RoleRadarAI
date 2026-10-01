@@ -95,7 +95,19 @@ GET /match-runs/{id}/events (SSE) ─► progress events (counts, current job, E
 
 ## 6. EURES boundary
 
-RoleRadarAI **never** fetches or extracts EURES vacancy content (PRD §8). It only builds search URLs, which the user opens in their own browser, and records the workflow status. The job importer rejects EURES hosts.
+The URL importer rejects EURES hosts, and the EURES queue only builds search URLs that the user opens in their own browser (PRD §8).
+
+The one exception is the opt-in EURES scan (PRD §84, user override for local testing; `EURES_SCRAPER_ENABLED=false` by default). It uses its own client (`app/discovery/eures_scan.py`), not the URL importer. It makes one request at a time with at least 10 s between requests (robots.txt Crawl-delay), sends an honest User-Agent, and stops for the run on 403, 429 or a captcha page.
+
+### Discovery runs (P14)
+
+```text
+POST /discovery-runs ─► Celery roleradar.discovery_run (one at a time)
+  1. job boards (JobSpy: Indeed DK, LinkedIn, Google)  ─┐ until scrape budget
+  2. EURES: term search + rotating SIRI company scan   ─┘ (store_normalized, cross-board dedup)
+  3. score unscored relevant jobs (MatchRun) until the total budget; leftovers go first next time
+GET /discovery-runs/{id}/events (SSE)
+```
 
 ## 7. Security boundaries (PRD §67)
 

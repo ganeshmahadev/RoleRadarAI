@@ -24,7 +24,6 @@ from app.services.match_queue import MatchQueue, get_match_queue
 router = APIRouter(tags=["discovery"])
 QueueDep = Annotated[MatchQueue, Depends(get_match_queue)]
 TERMINAL = {"DONE", "CANCELLED", "FAILED"}
-EURES_AVAILABLE = False  # until the EURES search request format is confirmed (OD-7)
 
 
 async def settings_read(session: AsyncSession) -> DiscoverySettingsRead:
@@ -36,7 +35,7 @@ async def settings_read(session: AsyncSession) -> DiscoverySettingsRead:
             "effective_terms": await discovery_service.effective_terms(session, row),
             "jobspy_enabled": config.discovery_jobspy_enabled,
             "eures_scraper_enabled": config.eures_scraper_enabled,
-            "eures_available": EURES_AVAILABLE,
+            "eures_available": config.eures_scraper_enabled,
         }
     )
 
