@@ -1422,6 +1422,32 @@ Use timeout handling.
 
 Add retries only for transport failures.
 
+### OpenJev contract (confirmed 2026-10-02, resolves OD-1)
+
+Source: main model card `openjev/openjev` at revision `1c341f65` and the served helper `shim.py@81a22f1b`.
+
+```text
+POST /v1/systemone
+{ "state": "<text>",                       # plain text; a dict would be JSON-escaped
+  "questions": { "<id>": {"type": "choice"|"score"|"noul", "instructions": "...", "criteria": ...} } }
+
+choice  criteria = {option: description|null}      → {choice, probabilities, confidence}
+score   criteria = [ordered levels, lowest first]   → {score: expected level index, legend, probabilities, confidence}
+noul    criteria optional {true, false}             → {noul: calibrated yes-probability}
+response: {id, model, answers: {<id>: ...}, usage: {input_tokens}}
+GET /v1/version → model_dir, calibration constants, flags, shim_sha256
+```
+
+Limits: ≤ 52 options per question in one pass; prompts ≤ 16,384 tokens; keep the README calibration settings. `model_revision` is derived from `/v1/version` (model dir, calibration, helper sha, flags).
+
+### P5 implementation decisions (2026-10-02, implementation-local)
+
+- Scoring is **asynchronous**: `POST /jobs/{id}/score` returns the cached result, an in-flight match, or a new `QUEUED` match; a Celery worker runs it (an in-process `inline` queue exists for tests and worker-less local runs). The UI polls the match.
+- The cache key also includes a hash of the CandidateProfile, because the profile is part of the model input (§30); editing the profile therefore invalidates scores, like changing the resume.
+- The linear job-processing pipeline (§36) is plain deterministic async code with the same steps; LangGraph arrives in P10, where checkpointing and human review are needed.
+- The cheap relevance filter (§28) applies to bulk matching (P7); an explicit "Score job" click always scores.
+- Inputs are capped (resume and description 16,000 characters each) to stay inside the 16,384-token prompt limit; truncation is recorded in the match explanation.
+
 Cache results using:
 
 ```text
@@ -2742,7 +2768,7 @@ These are unresolved. Do not invent answers; resolve with the user before the li
 
 | ID | Question | Blocks | Notes |
 |---|---|---|---|
-| OD-1 | OpenJev request/response contract for `/v1/systemone` (payload shape, label/rule format, output schema, model revision field). | P5 | **Partly observed 2026-10-01** from the running server and its helper source (shim.py@81a22f1b): `POST {state, questions: {id: {type: choice\|score\|noul, instructions, criteria}}}`; `choice.criteria` = map option→description\|null → `{choice, probabilities, confidence}`; `score.criteria` = ordered list of ≥2 levels → `{score}` (expected level index); `noul` → `{noul}` (yes-probability); response `model` string pins model dir + calibration + helper sha (use as `model_revision`); `GET /v1/version`. Still to confirm against the main model card before P5. |
+| OD-1 | ~~OpenJev request/response contract~~ | — | **Resolved 2026-10-02**: confirmed against the main model card (openjev/openjev@1c341f65) and the helper source; see §29. |
 | OD-2 | ~~Numeric value of `must_have_fit`~~ | — | **Resolved 2026-10-02**, see §18 and §82. |
 | OD-3 | ~~Effect of a hard blocker~~ | — | **Resolved 2026-10-02**, see §19 and §82. |
 | OD-4 | ~~Dimension display format~~ | — | **Resolved 2026-10-02**: 0–100 everywhere, see §18 and §82. |

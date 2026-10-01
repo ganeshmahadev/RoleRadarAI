@@ -11,8 +11,8 @@
 ## Current state
 
 ```text
-Active phase: P2 complete — STOPPED for human review (next: P5 OpenJev matching)
-Active item: none
+Active phase: P5 — OpenJev matching
+Active item: P5-004
 Last known-good commit: P2-004 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
@@ -25,7 +25,7 @@ Order (human decision 2026-10-01): **P0 → P1 → P3 → P4 → P2 → P5 → P
 
 Reason: the human asked for the vertical discovery slice (Next.js → FastAPI → Postgres → workbook import → Companies UI → EURES queue → original-job URL importer) before the resume and OpenJev work. P3 runs before P4, so the EURES queue's "Import job URL" action moved to P4-010.
 
-Authorized: P0, P1, P3, P4 (done). **P2 authorized 2026-10-02** ("start the implementation now"); stop and report after P2.
+Authorized: P0, P1, P3, P4, P2 (done). **P5 authorized 2026-10-02** ("do the next steps"); stop and report after P5.
 
 Push policy (human decision 2026-10-01): push `main` to `origin` (normal push, never force) after each completed phase.
 
@@ -567,13 +567,17 @@ All P4 items DONE. Acceptance (IMPLEMENTATION_PLAN §54): supported URLs produce
 
 # Phase P5 — OpenJev matching
 
-**Decisions resolved 2026-10-02:** OD-2, OD-3, OD-4, OD-6 (PRD §18, §19, §21, §82). Remaining before P5 code: confirm OD-1 (OpenJev contract) against the main model card; the observed contract already covers the `score` and `noul` question types rubric_v1 uses.
+**Decisions resolved 2026-10-02:** OD-1 (contract confirmed, PRD §29), OD-2, OD-3, OD-4, OD-6 (PRD §18, §19, §21, §82). Implementation decisions in PRD §29 "P5 implementation decisions".
 
-**Depends on:** P2 (scoring needs an uploaded resume + profile).
+**Depends on:** P2 (done).
+
+Plan (2026-10-02): P5-001+P5-003 provider + `/health/openjev` → P5-004 rubric_v1 + pure scoring → P5-005/P5-006 MatchScore, cache key, queue (Celery + inline), `/jobs/{id}/score`, `/matches` → P5-007 Score job UI on the job page + E2E against a fake OpenJev → live run against the real model.
 
 ## P5-001 — Define `DecisionProvider`
 
-**Status:** TODO
+**Status:** DONE (with P5-003; hash in P5-004)
+
+- [x] `app/providers/decision.py`: generic `DecisionProvider` (`model_info()`, `decide(state, questions)`), typed `ScoreQuestion` / `YesNoQuestion` and validated answers; errors `DECISION_PROVIDER_UNAVAILABLE` (retryable, 503), `DECISION_REQUEST_REJECTED`, `DECISION_INVALID_RESPONSE`.
 
 ---
 
@@ -594,8 +598,13 @@ Do not commit model weights into Git.
 
 ## P5-003 — Implement `OpenJevProvider`
 
-**Status:** TODO  
+**Status:** DONE (with P5-001)  
 **Depends on:** P5-001, P5-002
+
+- [x] `app/providers/openjev.py`: httpx client to `OPENJEV_BASE_URL` (not the SSRF fetcher), connect 5 s / read `OPENJEV_TIMEOUT_SECONDS` (1800 s), retries only transport failures (2×), 5xx → unavailable, 4xx → rejected, response validated (all questions answered, correct types, probabilities in [0,1]);
+- [x] `model_revision` from `/v1/version` (model dir, calibration, helper sha, flags hash);
+- [x] `GET /api/v1/health/openjev` (200 with revision / 503);
+- [x] tests with a wire-compatible fake (`tests/fake_openjev.py`): 11 (255 backend total).
 
 ---
 

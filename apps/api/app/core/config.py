@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -17,6 +18,10 @@ class Settings(BaseSettings):
     # OpenJev runs natively on the macOS host (MLX); see docs/ARCHITECTURE.md.
     openjev_base_url: str = "http://localhost:4100"
     openjev_model: str = "openjev/openjev-MLX-4bit"
+    # One scoring request asks many questions over a long prompt; allow minutes.
+    openjev_timeout_seconds: float = 1800.0
+    # "celery" (worker) or "inline" (in the API process; tests and worker-less local runs).
+    match_queue: Literal["celery", "inline"] = "celery"
 
     upload_dir: str = "./uploads"
     generation_provider: str | None = None
