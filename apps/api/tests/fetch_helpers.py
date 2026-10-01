@@ -1,5 +1,6 @@
 import ipaddress
 from collections.abc import Callable
+from pathlib import Path
 
 import httpx
 
@@ -35,3 +36,14 @@ def by_host(routes: dict[str, httpx.Response]) -> Callable[[httpx.Request], http
         return routes.get(key, httpx.Response(404))
 
     return handler
+
+
+FIXTURES = Path(__file__).parent / "fixtures" / "jobs"
+
+
+def fixture(name: str) -> str:
+    return (FIXTURES / name).read_text(encoding="utf-8")
+
+
+def html_response(body: str) -> httpx.Response:
+    return httpx.Response(200, headers={"content-type": "text/html; charset=utf-8"}, text=body)

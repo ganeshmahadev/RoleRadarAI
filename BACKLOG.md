@@ -12,7 +12,7 @@
 
 ```text
 Active phase: P4 — Job-source connectors
-Active item: P4-004
+Active item: P4-008
 Last known-good commit: P3-002 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
@@ -428,14 +428,21 @@ Completion commit: `a13c944`
 - [x] `html_to_text` / `clean_text` (descriptions stored as plain text);
 - [x] tests (8).
 
-Completion commit: this commit; hash recorded in P4-004.
+Completion commit: `d489b1d`
 
 ---
 
 ## P4-004 — Implement JSON-LD `JobPosting` connector
 
-**Status:** TODO  
+**Status:** DONE  
 **Depends on:** P4-003
+
+- [x] `app/connectors/jsonld.py`: finds JobPosting in any ld+json block, `@graph`, list `@type`, comment/CDATA wrapped; malformed JSON skipped;
+- [x] fields: title, plain-text description (escaped HTML handled), hiringOrganization, multi-location, country (code or name, as given), employmentType, TELECOMMUTE → remote, identifier, url, datePosted/validThrough;
+- [x] `EmployerPageConnector` (robots.txt checked, incl. cross-host redirect target; HTML only); incomplete data → `EXTRACTION_FAILED` with manual-paste hint;
+- [x] fixtures `tests/fixtures/jobs/jsonld_*.html`; tests (7).
+
+Completion commit: this commit; hash recorded in P4-008.
 
 ---
 
