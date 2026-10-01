@@ -1198,7 +1198,7 @@ Do not invent:
 - company relationships/subsidiaries without evidence;
 - salaries absent from the vacancy;
 - candidate credentials;
-- EURES authorization/API access that has not been granted;
+- EURES authorization/API access that has not been granted (the P14 EURES scan is a user-approved scraping override, PRD §84, not authorized access);
 - ATS endpoints that have not been verified;
 - source permissions that have not been established.
 

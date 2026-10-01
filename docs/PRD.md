@@ -256,6 +256,8 @@ OpenJev comparison
 
 EURES therefore remains part of every company-search workflow.
 
+**User override (2026-10-02, §84):** an opt-in, throttled **EURES scan** (P14) may fetch EURES search results and vacancy details for SIRI companies, for local educational/testing use. It is off by default, never evades blocking, and does not replace this manual workflow; the URL importer still rejects EURES links.
+
 The application should track:
 
 ```text
@@ -351,6 +353,8 @@ EuresAuthorizedConnector
 ```
 
 `EuresDiscoveryConnector` only builds/searches navigation URLs and records human workflow state.
+
+Until P13, the opt-in `EuresScanSource` (§84) implements `search_company` by scraping, as a stand-in for `EuresAuthorizedConnector`.
 
 It does not extract EURES vacancy content.
 
@@ -1313,6 +1317,8 @@ A source is permitted for automated retrieval only when all of these hold:
 - the ATS public job-board API is used only where it is publicly documented for that purpose, and its endpoint is verified against fixtures before use (§54).
 
 Otherwise the user falls back to manual JD paste.
+
+**Exception (user override 2026-10-02, §84):** automated *discovery* runs may bulk-search Indeed, LinkedIn and Google Jobs through JobSpy and scan EURES, within the §84 guardrails. Single-URL imports keep the rules above.
 
 Supported adapters should eventually include:
 
@@ -2759,6 +2765,8 @@ This architecture keeps SIRI and EURES central to the job-search experience whil
 | 2026-10-02 | Blocker = hard-requirement type stated as mandatory and NOT_MET; score unchanged, category "Blocked", ranked below unblocked jobs by default; PARTIAL = warning (OD-3). | §19, §21 |
 | 2026-10-02 | All dimensions and the overall score on 0–100; dimension = expected level / 4 × 100 (OD-4). | §18, §49 |
 | 2026-10-02 | Must-have requirements = the §19 hard-requirement types, each checked with two OpenJev yes/no questions (required? met?); no free-text extraction before P9 (OD-6). | §19 |
+| 2026-10-02 | **User override:** automated discovery via JobSpy (Indeed DK, LinkedIn, Google Jobs) and an EURES scan, for local educational/testing use, off by default, with the §84 guardrails. Supersedes "never fetch EURES content" for the scan only. | §8, §26, §84 |
+| 2026-10-02 | Daily automation: macOS launchd starts OpenJev, runs discovery (scrape first, then score until ~60 min), stops OpenJev. | §84 |
 
 ---
 
@@ -2774,3 +2782,31 @@ These are unresolved. Do not invent answers; resolve with the user before the li
 | OD-4 | ~~Dimension display format~~ | — | **Resolved 2026-10-02**: 0–100 everywhere, see §18 and §82. |
 | OD-5 | What happens to companies missing from a later SIRI list (keep, mark `siri_certified=false`, or `active=false`). | future SIRI refresh | Not needed for the one-time seed import. |
 | OD-6 | ~~How must-have requirements are obtained without an extractor~~ | — | **Resolved 2026-10-02**: fixed hard-requirement types with two OpenJev yes/no questions each, see §19 and §82. |
+| OD-7 | Which EURES endpoints the scan may call (JSON search + vacancy detail), robots.txt, and whether any WAF/captcha/login blocks automation. | P14-005 | Resolved by the P14-002 spike; if blocked, the EURES scan is not built. |
+
+---
+
+# 84. Automated Discovery (user override, educational/testing use)
+
+Decision of the user, 2026-10-02. The user knowingly overrides the EURES terms and the earlier "never fetch EURES content" rule **for local, personal, educational/testing use only**.
+
+## Sources
+
+- **JobSpy** (`python-jobspy`, MIT): Indeed (Denmark), LinkedIn, Google Jobs.
+- **EURES scan**: per SIRI company, the same query as the company's EURES search URL (§8); results whose employer matches the company exactly are imported and linked to it, and the company's EURES status is updated automatically (jobs → `JOB_FOUND`, none → `CHECKED_NO_JOBS`, blocked/error → `ERROR`; notes never touched).
+
+## Guardrails (mandatory)
+
+- Off by default: `DISCOVERY_JOBSPY_ENABLED=false`, `EURES_SCRAPER_ENABLED=false`.
+- Sequential and throttled (EURES ≥ 3 s between requests; a pause between job-board searches); per-run caps on results per site and on EURES companies (rotating oldest-checked first).
+- **No evasion**: no proxies, captcha solving, or user-agent rotation/impersonation beyond JobSpy's defaults. HTTP 403/429 or a captcha marks that source *blocked for this run*; the run continues with the other sources.
+- Local only: nothing is republished or shared. The URL importer still rejects EURES links.
+
+## Run
+
+Search now (manual) or daily (scheduled): scrape job boards → EURES scan (until the scrape budget) → import (existing pipeline, exact SIRI linking) → score relevant jobs (target-role title filter, §28) until the total budget; unscored leftovers are scored first next time. Jobs found on several boards are kept as one job with several sources (same company, normalized title and location within 30 days; the first description is kept, §15).
+
+## Daily automation
+
+macOS launchd runs `scripts/daily-discovery.sh`: start Docker and OpenJev → trigger a scheduled run → wait (≤ 70 min) → stop OpenJev, freeing ~15 GB. On this 24 GB Mac a 60-minute run scores about 3–4 jobs after scraping.
+

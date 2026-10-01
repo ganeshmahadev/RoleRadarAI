@@ -11,8 +11,8 @@
 ## Current state
 
 ```text
-Active phase: P7 complete — STOPPED for human review (next: P8 application tracking)
-Active item: none
+Active phase: P14 — Automated discovery (user override; runs before P8)
+Active item: P14-002
 Last known-good commit: P7 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
@@ -25,7 +25,7 @@ Order (human decision 2026-10-01): **P0 → P1 → P3 → P4 → P2 → P5 → P
 
 Reason: the human asked for the vertical discovery slice (Next.js → FastAPI → Postgres → workbook import → Companies UI → EURES queue → original-job URL importer) before the resume and OpenJev work. P3 runs before P4, so the EURES queue's "Import job URL" action moved to P4-010.
 
-Authorized: P0, P1, P3, P4, P2, P5, P6 (done). **P7 authorized 2026-10-02** ("do it"); stop and report after P7.
+Authorized: P0, P1, P3, P4, P2, P5, P6, P7 (done). **P14 authorized 2026-10-02** (plan approved: JobSpy + EURES scan override + daily launchd run); stop and report after P14. P8 follows.
 
 Push policy (human decision 2026-10-01): push `main` to `origin` (normal push, never force) after each completed phase.
 
@@ -842,6 +842,44 @@ invalid URL
 validation failure
 unsupported source
 ```
+
+---
+
+# Phase P14 — Automated discovery (user override, PRD §84)
+
+Plan: `~/.claude-work/plans/okay-that-is-good-sequential-raccoon.md` (approved 2026-10-02). Runs before P8.
+
+## P14-001 — Record the override and guardrails in the docs
+
+**Status:** DONE — PRD §8/§9/§26 notes, new §84, §82 rows, OD-7; AGENTS §5; COMMIT_PROTOCOL §28.
+
+## P14-002 — Spike: EURES endpoints, robots.txt, fixtures (OD-7)
+
+**Status:** TODO — stop and report if WAF/captcha/login; no workaround.
+
+## P14-003 — Source types, discovery settings and run models
+
+**Status:** TODO
+
+## P14-004 — JobSpy source (Indeed DK, LinkedIn, Google) + cross-board dedup
+
+**Status:** TODO
+
+## P14-005 — EURES scan source (per company, rotation, status updates)
+
+**Status:** TODO — depends on P14-002
+
+## P14-006 — Discovery orchestrator, time budget, Celery task, API + SSE
+
+**Status:** TODO
+
+## P14-007 — Discover page (settings, Search now, progress, results)
+
+**Status:** TODO
+
+## P14-008 — Daily automation (script + launchd; install only after the user picks a time)
+
+**Status:** TODO
 
 ---
 

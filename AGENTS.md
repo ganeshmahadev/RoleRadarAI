@@ -107,7 +107,7 @@ Do not collapse discovery, retrieval, scoring, and generation into one agent.
 - The master resume is the candidate evidence source of truth.
 - Generated material must not invent candidate experience.
 - URL ingestion must include SSRF protection.
-- RoleRadarAI never fetches EURES vacancy content; it only builds EURES search URLs (PRD §8).
+- EURES content is fetched **only** by the opt-in, throttled EURES scan of automated discovery (P14, PRD §84, user override for local testing); never via URL import. Discovery sources must never evade blocking (no proxies, captcha solving, UA rotation).
 - Company re-import never overwrites EURES workflow state (PRD §7.1).
 - Product decisions live in `docs/PRD.md` §82; unresolved questions in §83. Do not invent answers to §83.
 - Secrets never belong in the frontend or Git.
