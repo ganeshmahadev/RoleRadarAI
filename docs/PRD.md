@@ -2782,7 +2782,7 @@ These are unresolved. Do not invent answers; resolve with the user before the li
 | OD-4 | ~~Dimension display format~~ | — | **Resolved 2026-10-02**: 0–100 everywhere, see §18 and §82. |
 | OD-5 | What happens to companies missing from a later SIRI list (keep, mark `siri_certified=false`, or `active=false`). | future SIRI refresh | Not needed for the one-time seed import. |
 | OD-6 | ~~How must-have requirements are obtained without an extractor~~ | — | **Resolved 2026-10-02**: fixed hard-requirement types with two OpenJev yes/no questions each, see §19 and §82. |
-| OD-7 | Which EURES endpoints the scan may call (JSON search + vacancy detail), robots.txt, and whether any WAF/captcha/login blocks automation. | P14-005 | Resolved by the P14-002 spike; if blocked, the EURES scan is not built. |
+| OD-7 | Which EURES endpoints the scan may call (JSON search + vacancy detail), and whether any WAF/captcha/login blocks automation. | P14-005 | **Partly answered 2026-10-02:** robots.txt allows `/eures/` with **Crawl-delay: 10** (scan must wait ≥ 10 s between requests); the SPA's data endpoints are still unknown (spike blocked, see BACKLOG P14-002). Needs the user's input. |
 
 ---
 
@@ -2798,7 +2798,7 @@ Decision of the user, 2026-10-02. The user knowingly overrides the EURES terms a
 ## Guardrails (mandatory)
 
 - Off by default: `DISCOVERY_JOBSPY_ENABLED=false`, `EURES_SCRAPER_ENABLED=false`.
-- Sequential and throttled (EURES ≥ 3 s between requests; a pause between job-board searches); per-run caps on results per site and on EURES companies (rotating oldest-checked first).
+- Sequential and throttled (EURES ≥ 10 s between requests, per robots.txt Crawl-delay; a pause between job-board searches); per-run caps on results per site and on EURES companies (rotating oldest-checked first).
 - **No evasion**: no proxies, captcha solving, or user-agent rotation/impersonation beyond JobSpy's defaults. HTTP 403/429 or a captcha marks that source *blocked for this run*; the run continues with the other sources.
 - Local only: nothing is republished or shared. The URL importer still rejects EURES links.
 

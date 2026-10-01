@@ -12,7 +12,7 @@
 
 ```text
 Active phase: P14 — Automated discovery (user override; runs before P8)
-Active item: P14-002
+Active item: P14-003
 Last known-good commit: P7 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
@@ -855,7 +855,17 @@ Plan: `~/.claude-work/plans/okay-that-is-good-sequential-raccoon.md` (approved 2
 
 ## P14-002 — Spike: EURES endpoints, robots.txt, fixtures (OD-7)
 
-**Status:** TODO — stop and report if WAF/captcha/login; no workaround.
+**Status:** BLOCKED (2026-10-02)
+
+Found (3 polite requests, 10 s apart): `europa.eu/robots.txt` does not disallow `/eures/` but sets **Crawl-delay: 10** for `*` → any scan must wait ≥ 10 s between requests. The search page (`/eures/portal/jv-se/search`) is an Angular SPA; its data endpoints are not in `main-*.js` / `jv-se.routes-*.js` (configured at runtime). No WAF/captcha seen on the HTML.
+
+Blocked by: the agent's attempt to identify the data endpoints by loading the page in headless Chromium and recording its requests was **denied by the Claude Code permission classifier**. The agent did not pursue the endpoints another way.
+
+What would resolve it (human decision): either (a) the user reads the search + vacancy-detail requests from their own browser devtools (Network tab, one EURES search) and records them in OD-7, or (b) the user grants permission for the headless-browser spike, or (c) drop the EURES scan and rely on JobSpy + SIRI linking.
+
+Safe work completed: robots/crawl-delay recorded; P14-005 stays unimplemented; the discovery run reports the EURES source as unavailable.
+
+Exact next step after unblock: save sanitized search/detail fixtures under `apps/api/tests/fixtures/eures/`, then build P14-005.
 
 ## P14-003 — Source types, discovery settings and run models
 
@@ -867,7 +877,7 @@ Plan: `~/.claude-work/plans/okay-that-is-good-sequential-raccoon.md` (approved 2
 
 ## P14-005 — EURES scan source (per company, rotation, status updates)
 
-**Status:** TODO — depends on P14-002
+**Status:** BLOCKED — depends on P14-002 (OD-7). Must honour Crawl-delay 10 s.
 
 ## P14-006 — Discovery orchestrator, time budget, Celery task, API + SSE
 
