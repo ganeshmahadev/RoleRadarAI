@@ -11,9 +11,9 @@
 ## Current state
 
 ```text
-Active phase: P7 — Background/bulk processing
-Active item: P7-003
-Last known-good commit: P6 (see Overnight handoff)
+Active phase: P7 complete — STOPPED for human review (next: P8 application tracking)
+Active item: none
+Last known-good commit: P7 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
 Last updated: 2026-10-01
@@ -808,10 +808,15 @@ Plan and implementation decisions (2026-10-02, implementation-local):
 
 ## P7-003 — Add SSE progress updates
 
-**Status:** IN_PROGRESS
+**Status:** DONE
 
 - [x] `GET /match-runs/{id}/events`: `progress` event whenever the run changes, `: keepalive` every 15 s, `end` when finished (poll interval `RUN_EVENTS_POLL_SECONDS`).
-- [ ] UI (batch panel with EventSource + polling fallback).
+- [x] UI: "Score jobs in bulk…" on Matches and Jobs → preview dialog (scope, title filter, target roles, jobs to score / skipped, time estimate) → live panel (status, n of N, ETA, current job, progress bar, cancel) via EventSource with polling fallback → summary (scored / up to date / skipped / failed with reasons, dismiss); job lists refresh as each job finishes;
+- [x] tests: Vitest 4 new (52 total); Playwright `batch.spec.ts` (relevance filter, live progress, ranked result, irrelevant job never scored, nothing left to score) — 19 total.
+
+### P7 phase exit (2026-10-02)
+
+All P7 items DONE (IMPLEMENTATION_PLAN §57): Celery tasks, Redis queue, task status, retry policy with bounded exponential backoff and no retry for invalid/rejected input, SSE progress, batch matching. Docker check: worker registers `roleradar.match_run` and executes it (unknown run id → clean no-op). A full real-model batch was not run (≈ 12 min per job on this Mac and runs use the primary resume); the per-job OpenJev path is the one verified live in P5.
 
 ---
 
@@ -819,7 +824,7 @@ Plan and implementation decisions (2026-10-02, implementation-local):
 
 **Status:** DONE
 
-- [x] OpenJev unavailable / timeout / 5xx → backoff `MATCH_RETRY_DELAYS_SECONDS` (30, 60, 120); invalid response / rejected / input changed / job gone → no retry, only that job fails; persistent outage stops the run (remaining jobs SKIPPED). Tests: 14 in `test_match_runs.py` (342 backend total).
+- [x] OpenJev unavailable / timeout / 5xx → backoff `MATCH_RETRY_DELAYS_SECONDS` (30, 60, 120); invalid response / rejected / input changed / job gone → no retry, only that job fails; persistent outage stops the run (remaining jobs SKIPPED). Tests: 14 in `test_match_runs.py` (341 backend total).
 
 Retry:
 
@@ -1130,7 +1135,31 @@ Notes:
 
 # Overnight handoff
 
-## P6 run (latest)
+## P7 run (latest)
+
+```text
+Last updated: 2026-10-02
+Last commit: see `git log -1`; pushed to origin/main with this phase
+Current branch: main
+Worktree: clean
+Active phase: none — P0, P1, P3, P4, P2, P5, P6, P7 complete
+Status: STOPPED for human review
+
+Completed this run:
+- P7 backend: relevance filter, match runs, retries, SSE, Celery run task (b09b739)
+- P7-003 UI: batch dialog + live panel; docs (this commit)
+
+Validation (end of P7):
+- backend: ruff, format, mypy strict, pytest (341) — PASS; migration 2c4db9b939ad round-trip on roleradar_test
+- frontend: prettier, lint, typecheck, test (52), build — PASS; pnpm test:e2e (19) — PASS
+- Docker: rebuilt; dev DB upgraded only; worker runs roleradar.match_run
+
+Exact next action (after human approval):
+1. P8 application tracking: Application model/state machine (PRD §34 states), Apply action on the job page,
+   pipeline table/Kanban, notes/dates/contacts/next action, Applied / Not applied job filters, dashboard tiles.
+```
+
+## P6 run
 
 ```text
 Last updated: 2026-10-02

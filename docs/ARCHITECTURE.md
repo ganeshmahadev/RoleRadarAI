@@ -82,6 +82,17 @@ POST /jobs/{id}/score ──► model_info (OpenJev /v1/version) ──► input
 - `input_hash` = resume text hash + profile hash + job content hash + model revision + rubric version; a partial unique index keeps one live match per input.
 - OpenJev outage: the match goes back to QUEUED and Celery retries twice with backoff, then FAILED.
 
+### Batch runs (P7)
+
+```text
+POST /match-runs/preview|/match-runs ─► plan: scope (unscored / outdated / chosen jobs, never ignored)
+                                         └► relevance filter: every word of a target role in the title
+MatchRun QUEUED (+ items, irrelevant ones SKIPPED up front) ─► Celery roleradar.match_run (one at a time)
+   per job: cached → CACHED · in flight → wait · else score (OpenJev outage: 30/60/120 s backoff)
+   other errors fail only that job · persistent outage stops the run · cancel stops after the current job
+GET /match-runs/{id}/events (SSE) ─► progress events (counts, current job, ETA) ─► end
+```
+
 ## 6. EURES boundary
 
 RoleRadarAI **never** fetches or extracts EURES vacancy content (PRD §8). It only builds search URLs, which the user opens in their own browser, and records the workflow status. The job importer rejects EURES hosts.

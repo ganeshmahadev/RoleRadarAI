@@ -10,6 +10,7 @@ export CORS_ORIGINS='["http://localhost:3200"]'
 export UPLOAD_DIR="$(mktemp -d -t roleradar-e2e-uploads)"   # never the real upload folder
 # Scoring runs in-process against a deterministic fake OpenJev (never the real model).
 export MATCH_QUEUE=inline
+export MATCH_RETRY_DELAYS_SECONDS='[0.1, 0.2]'
 export OPENJEV_BASE_URL=http://127.0.0.1:4299
 
 uv run python - <<'PY'

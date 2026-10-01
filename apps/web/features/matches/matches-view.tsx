@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { JobFilters } from "@/features/jobs/job-filters";
+import { BatchPanel } from "@/features/match-runs/batch-panel";
 import { JobsTable } from "@/features/jobs/jobs-table";
 import { useJobQuery } from "@/features/jobs/use-job-query";
 import { DEFAULT_JOB_QUERY, type JobQuery } from "@/lib/api/jobs";
@@ -20,6 +21,7 @@ export function MatchesView() {
   const [query, setQuery] = useJobQuery(MATCHES_QUERY);
   return (
     <div className="space-y-4">
+      <BatchPanel />
       <JobFilters query={query} onQueryChange={setQuery} showSort={false} />
       {query.category && (
         <p className="text-sm">

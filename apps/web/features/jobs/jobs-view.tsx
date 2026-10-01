@@ -5,6 +5,8 @@ import { useState } from "react";
 import { primaryButtonClass } from "@/components/ui/styles";
 import { DEFAULT_JOB_QUERY } from "@/lib/api/jobs";
 
+import { BatchPanel } from "@/features/match-runs/batch-panel";
+
 import { ImportJobDialog } from "./import-job-dialog";
 import { JobFilters } from "./job-filters";
 import { JobsTable } from "./jobs-table";
@@ -22,6 +24,7 @@ export function JobsView() {
           Import vacancy
         </button>
       </div>
+      <BatchPanel />
       {query.companyId && (
         <p className="text-sm">
           Showing jobs for one company ·{" "}
