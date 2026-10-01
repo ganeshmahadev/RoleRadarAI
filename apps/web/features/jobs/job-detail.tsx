@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { buttonClass, primaryButtonClass } from "@/components/ui/styles";
+import { MatchPanel } from "@/features/matches/match-panel";
 import { ApiError } from "@/lib/api/client";
 import { deleteJob, getJob, reviewSource, SOURCE_TYPE_LABELS, type Job } from "@/lib/api/jobs";
 import { formatDate, formatDateTime } from "@/lib/format";
@@ -154,6 +155,8 @@ export function JobDetail({ jobId }: { jobId: string }) {
           </div>
         ))}
       </dl>
+
+      <MatchPanel jobId={job.id} />
 
       <section aria-labelledby="description-title" className="space-y-2">
         <h2 id="description-title" className="text-sm font-semibold">

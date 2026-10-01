@@ -6,8 +6,11 @@ cd "$(dirname "$0")/../../../api"
 
 export DATABASE_URL="${E2E_DATABASE_URL:-postgresql+psycopg://roleradar:roleradar@localhost:5433/roleradar_e2e}"
 export REDIS_URL="${E2E_REDIS_URL:-redis://localhost:6379/14}"
-export CORS_ORIGINS='["http://localhost:3100"]'
+export CORS_ORIGINS='["http://localhost:3200"]'
 export UPLOAD_DIR="$(mktemp -d -t roleradar-e2e-uploads)"   # never the real upload folder
+# Scoring runs in-process against a deterministic fake OpenJev (never the real model).
+export MATCH_QUEUE=inline
+export OPENJEV_BASE_URL=http://127.0.0.1:4299
 
 uv run python - <<'PY'
 import os
@@ -23,4 +26,7 @@ PY
 uv run alembic downgrade base >/dev/null 2>&1
 uv run alembic upgrade head
 uv run python -m app.commands.import_siri ../../data/siri_certified_companies_eures_queue.xlsx
-exec uv run uvicorn app.main:app --port 8100 --log-level warning
+uv run python -m tests.fake_openjev_server 4299 &
+FAKE_PID=$!
+trap 'kill $FAKE_PID 2>/dev/null' EXIT INT TERM
+uv run uvicorn app.main:app --port 8200 --log-level warning

@@ -1,5 +1,6 @@
 import type { Company, CompanyPage } from "@/lib/api/companies";
 import type { Job } from "@/lib/api/jobs";
+import type { Match } from "@/lib/api/matches";
 import type { Profile, Resume } from "@/lib/api/resumes";
 
 export function makeCompany(overrides: Partial<Company> = {}): Company {
@@ -111,6 +112,54 @@ export function makeProfile(overrides: Partial<Profile> = {}): Profile {
     remote_preference: null,
     work_authorization: [],
     updated_at: "2026-10-02T09:00:00Z",
+    ...overrides,
+  };
+}
+
+export function makeMatch(overrides: Partial<Match> = {}): Match {
+  return {
+    id: "50000000-0000-4000-8000-000000000001",
+    job_id: "10000000-0000-4000-8000-000000000001",
+    resume_id: "30000000-0000-4000-8000-000000000001",
+    status: "DONE",
+    overall_score: 84.4,
+    category: "GOOD",
+    hard_blocker: false,
+    dimensions: {
+      must_have: null,
+      skills: 92.5,
+      experience: 75,
+      role: 100,
+      seniority: 75,
+      domain: 50,
+      education: 75,
+    },
+    requirements: [
+      {
+        key: "language",
+        label: "Mandatory language",
+        status: "UNKNOWN",
+        classification: "informational",
+        stated_probability: 0.1,
+        met_probability: null,
+      },
+    ],
+    matched_requirements: [],
+    uncertain_requirements: [],
+    missing_requirements: [],
+    explanation: {},
+    model_provider: "openjev",
+    model_name: "openjev-MLX-4bit",
+    model_revision: "openjev-MLX-4bit;T=0.85",
+    rubric_version: "rubric_v1",
+    input_hash: "h",
+    error_code: null,
+    error_message: null,
+    attempts: 1,
+    created_at: "2026-10-02T10:00:00Z",
+    started_at: "2026-10-02T10:00:01Z",
+    completed_at: "2026-10-02T10:02:00Z",
+    duration_ms: 119000,
     ...overrides,
   };
 }

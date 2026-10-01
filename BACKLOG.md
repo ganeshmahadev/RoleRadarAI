@@ -634,7 +634,7 @@ Application code owns weights.
 
 ## P5-005 — Persist match results
 
-**Status:** DONE (with P5-006; hash recorded in P5-007)
+**Status:** DONE (with P5-006, commit `d6216f0`)
 
 - [x] `MatchScore` model + migration `f8b28895d5f0` (round-trip + `alembic check` on `roleradar_test` only): status QUEUED/RUNNING/DONE/FAILED, all input hashes, model provider/name/revision, rubric version, seven 0–100 dimensions, blocker flag, per-requirement checks, matched/partial/missing lists, explanation (per-dimension probabilities, tokens, truncation), errors, attempts, timings; cascades with job and resume;
 - [x] `match_service`: request (cache / in-flight / new), two-phase run (dimensions + "stated?" → "met?" only for stated types), deferred on provider outage, `INPUT_CHANGED` guard, structured logs `match_started|completed|failed|deferred`;
@@ -680,9 +680,13 @@ rubric version changes
 
 ## P5-007 — Score job action and result panel
 
-**Status:** IN_PROGRESS
+**Status:** DONE (hash in handoff)
 
 P5 acceptance needs a "Score Job" action that shows all dimensions; the full ranked experience stays in P6.
+
+- [x] Match panel on `/jobs/[id]`: "Score against my resume", queued/running status with elapsed time and 3 s polling, result (score / 100, category or "Blocked: … not met", seven 0–100 dimension bars with n/a for an unstated must-have, stated requirements with ✓/△/✗ and probabilities, unstated types listed, model + rubric + duration, "not a chance of being hired"), failure with retry, clear messages for no resume / OpenJev down;
+- [x] E2E: isolated stack now on ports 3200/8200 with a wire-compatible fake OpenJev (`tests/fake_openjev_server.py`, :4299) and `MATCH_QUEUE=inline`; flow: score → running → blocked result with all dimensions → reload → cached; cleans up after itself;
+- [x] tests: Vitest 4 new (41 total), Playwright 1 new (16 total).
 
 ---
 

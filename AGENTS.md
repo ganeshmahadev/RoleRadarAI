@@ -159,7 +159,7 @@ pnpm lint
 pnpm typecheck                         # next typegen && tsc --noEmit
 pnpm test                              # Vitest + React Testing Library (apps/web/tests/unit)
 pnpm build
-pnpm test:e2e                          # Playwright + axe; starts an ISOLATED stack (api :8100 on db roleradar_e2e, reseeded each run; web :3100). Needs postgres+redis up. Never touches the dev DB.
+pnpm test:e2e                          # Playwright + axe; starts an ISOLATED stack (api :8200 on db roleradar_e2e, reseeded each run; web :3200; fake OpenJev :4299, inline match queue). Ports 3100/4000 belong to another local project (Flenspay). Needs postgres+redis up. Never touches the dev DB.
 
 # backend (run from apps/api)
 uv sync
