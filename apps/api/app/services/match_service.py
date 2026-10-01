@@ -386,6 +386,21 @@ async def get_match(session: AsyncSession, match_id: uuid.UUID) -> MatchScore | 
     return await session.get(MatchScore, match_id)
 
 
+async def is_match_outdated(session: AsyncSession, match: MatchScore) -> bool:
+    """Resume text, profile, job content or rubric changed since scoring (model revision is
+    not checked here: that needs OpenJev online)."""
+    job = await session.get(Job, match.job_id)
+    resume = await session.get(Resume, match.resume_id)
+    if job is None or resume is None:
+        return False
+    return (
+        match.resume_text_hash != resume.text_hash
+        or match.profile_hash != profile_hash(resume.profile)
+        or match.job_content_hash != job.content_hash
+        or match.rubric_version != CURRENT_RUBRIC.version
+    )
+
+
 async def list_matches(
     session: AsyncSession,
     *,

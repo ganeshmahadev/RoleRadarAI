@@ -17,7 +17,7 @@ ProviderDep = Annotated[DecisionProvider, Depends(get_decision_provider)]
 QueueDep = Annotated[MatchQueue, Depends(get_match_queue)]
 
 
-def to_read(match: MatchScore) -> MatchRead:
+async def to_read(session: SessionDep, match: MatchScore) -> MatchRead:
     dims = Dimensions(
         must_have=match.must_have_fit,
         skills=match.skills_fit,
@@ -27,12 +27,12 @@ def to_read(match: MatchScore) -> MatchRead:
         domain=match.domain_fit,
         education=match.education_fit,
     )
-    return MatchRead.model_validate(
-        {
-            **{c: getattr(match, c) for c in MatchRead.model_fields if c != "dimensions"},
-            "dimensions": dims,
-        }
+    computed = ("dimensions", "outdated")
+    fields = {c: getattr(match, c) for c in MatchRead.model_fields if c not in computed}
+    outdated = match.status is MatchStatus.DONE and await match_service.is_match_outdated(
+        session, match
     )
+    return MatchRead.model_validate({**fields, "dimensions": dims, "outdated": outdated})
 
 
 @router.post("/jobs/{job_id}/score", response_model=ScoreResponse)
@@ -59,7 +59,8 @@ async def score_job(
             raise
         response.status_code = status.HTTP_202_ACCEPTED
     return ScoreResponse(
-        match=to_read(match), cached=not created and match.status is MatchStatus.DONE
+        match=await to_read(session, match),
+        cached=not created and match.status is MatchStatus.DONE,
     )
 
 
@@ -68,7 +69,7 @@ async def get_match(match_id: uuid.UUID, session: SessionDep) -> MatchRead:
     match = await match_service.get_match(session, match_id)
     if match is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Match not found")
-    return to_read(match)
+    return await to_read(session, match)
 
 
 @router.get("/matches", response_model=list[MatchRead])
@@ -81,4 +82,4 @@ async def list_matches(
     matches = await match_service.list_matches(
         session, job_id=job_id, resume_id=resume_id, limit=limit
     )
-    return [to_read(m) for m in matches]
+    return [await to_read(session, m) for m in matches]

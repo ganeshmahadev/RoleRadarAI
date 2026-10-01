@@ -6,7 +6,7 @@ from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
 from app.connectors.errors import SourceError
 from app.connectors.http import validate_url
-from app.models import SnapshotStatus, SourceType
+from app.models import JobStatus, SnapshotStatus, SourceType
 from app.services.job_import import ImportOutcome
 
 
@@ -74,6 +74,33 @@ class JobSummary(BaseModel):
     published_at: datetime | None
     created_at: datetime
     source_update_pending: bool
+    status: JobStatus
+
+
+class MatchSummary(BaseModel):
+    """The job's current Match: latest DONE score for the primary resume."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    overall_score: float
+    category: str
+    hard_blocker: bool
+    missing_requirements: list[str]
+    uncertain_requirements: list[str]
+    completed_at: datetime | None
+
+
+class JobListItem(JobSummary):
+    match: MatchSummary | None
+    match_outdated: bool = Field(description="Resume, profile, job text or rubric changed since")
+    scoring: bool = Field(description="A newer score is queued or running")
+
+
+class JobUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    status: JobStatus
 
 
 class JobRead(JobSummary):

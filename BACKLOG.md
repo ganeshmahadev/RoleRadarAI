@@ -11,8 +11,8 @@
 ## Current state
 
 ```text
-Active phase: P5 complete — STOPPED for human review (next: P6 ranked matching)
-Active item: none
+Active phase: P6 — Ranked matching experience
+Active item: P6-001
 Last known-good commit: P5 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
@@ -25,7 +25,7 @@ Order (human decision 2026-10-01): **P0 → P1 → P3 → P4 → P2 → P5 → P
 
 Reason: the human asked for the vertical discovery slice (Next.js → FastAPI → Postgres → workbook import → Companies UI → EURES queue → original-job URL importer) before the resume and OpenJev work. P3 runs before P4, so the EURES queue's "Import job URL" action moved to P4-010.
 
-Authorized: P0, P1, P3, P4, P2 (done). **P5 authorized 2026-10-02** ("do the next steps"); stop and report after P5.
+Authorized: P0, P1, P3, P4, P2, P5 (done). **P6 authorized 2026-10-02** ("start P6"); stop and report after P6.
 
 Push policy (human decision 2026-10-01): push `main` to `origin` (normal push, never force) after each completed phase.
 
@@ -698,9 +698,22 @@ All P5 items DONE. Acceptance (IMPLEMENTATION_PLAN §55): "Score job" produces a
 
 ---
 
+Plan (2026-10-02), implementation decisions (implementation-local, reversible):
+- Job gets `status` NEW | SAVED | IGNORED (PRD §15 said P6). "Applied" belongs to P8 application tracking, so the Applied / Not applied filters arrive in P8. Ignored jobs are hidden unless the status filter asks for them.
+- A job's Match = its latest DONE match for the **primary** resume. Ranking: by score with blocked jobs below unblocked ones by default (OD-3), toggle to mix; unscored jobs last.
+- A match is flagged **outdated** when the resume text, profile, job content or rubric changed since it was scored (model revision is not checked offline). Outdated scores still show, with a "Score again" prompt.
+- One listing endpoint (`GET /jobs` with match fields, filters and sorts) serves both `/jobs` and the ranked `/matches` view.
+- Dashboard shows only data that exists today (companies, checked, jobs, scored, strong matches, saved, needs review); Applications / Interviews arrive with P8.
+
 ## P6-001 — Build Jobs list
 
-**Status:** TODO
+**Status:** IN_PROGRESS
+
+Backend done (commit: see P6-001 UI entry):
+- [x] `Job.status` NEW|SAVED|IGNORED + migration `1818d540c7c5` (explicit `ck_jobs_job_status`; round-trip on `roleradar_test` only); `PATCH /jobs/{id}` {status};
+- [x] `GET /jobs` returns each job's current Match (latest DONE for the primary resume, via `DISTINCT ON`), `match_outdated`, `scoring`; filters q (title/employer/company), location (location/city/country), company_id, source_type, siri_only, status (default NEW+SAVED), scored, min_score, blocked (last|mixed|exclude), category, update_pending; sorts match|newest|company|title;
+- [x] `MatchRead.outdated`;
+- [x] tests (17; 316 backend total).
 
 ---
 
@@ -718,6 +731,14 @@ country/location filter
 SIRI-only filter
 saved/applied status
 ```
+
+---
+
+## P6-004 — Dashboard
+
+**Status:** TODO
+
+PRD §33, limited to existing data (see plan above).
 
 ---
 

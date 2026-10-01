@@ -6,17 +6,21 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from app.api.deps import SessionDep
 from app.connectors.factory import get_registry
 from app.connectors.registry import ConnectorRegistry
-from app.models import Job
+from app.models import Job, JobStatus, SourceType
 from app.schemas.common import Page
 from app.schemas.job import (
     JobImportResponse,
     JobImportTextRequest,
     JobImportUrlRequest,
+    JobListItem,
     JobRead,
     JobSummary,
+    JobUpdate,
+    MatchSummary,
 )
 from app.services import job_import, job_service
 from app.services.job_import import CompanyNotFound, ImportResult, SnapshotConflict
+from app.services.job_service import DEFAULT_STATUSES, BlockedMode, JobFilters, JobSort
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -60,23 +64,54 @@ async def import_text(body: JobImportTextRequest, session: SessionDep) -> JobImp
     return _response(result)
 
 
-@router.get("", response_model=Page[JobSummary])
+@router.get("", response_model=Page[JobListItem])
 async def list_jobs(
     session: SessionDep,
+    q: Annotated[str | None, Query(max_length=200, description="Title or employer")] = None,
+    location: Annotated[str | None, Query(max_length=200)] = None,
     company_id: uuid.UUID | None = None,
-    q: Annotated[str | None, Query(max_length=200)] = None,
+    source_type: SourceType | None = None,
+    siri_only: bool = False,
+    status_in: Annotated[
+        list[JobStatus] | None, Query(alias="status", description="Default: NEW and SAVED")
+    ] = None,
+    scored: bool | None = None,
+    min_score: Annotated[float | None, Query(ge=0, le=100)] = None,
+    blocked: BlockedMode = "last",
+    update_pending: bool | None = None,
+    category: Annotated[str | None, Query(pattern="^(STRONG|GOOD|STRETCH|LOW|BLOCKED)$")] = None,
+    sort: JobSort = "newest",
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=200)] = 50,
-) -> Page[JobSummary]:
-    items, total = await job_service.list_jobs(
-        session, company_id=company_id, q=q, page=page, page_size=page_size
+) -> Page[JobListItem]:
+    filters = JobFilters(
+        q=q,
+        location=location,
+        company_id=company_id,
+        source_type=source_type,
+        siri_only=siri_only,
+        statuses=tuple(status_in) if status_in else DEFAULT_STATUSES,
+        scored=scored,
+        min_score=min_score,
+        blocked=blocked,
+        update_pending=update_pending,
+        category=category,
     )
-    return Page(
-        items=[JobSummary.model_validate(j) for j in items],
-        total=total,
-        page=page,
-        page_size=page_size,
+    rows, total, _ = await job_service.list_jobs(
+        session, filters, sort=sort, page=page, page_size=page_size
     )
+    items = [
+        JobListItem.model_validate(
+            {
+                **JobSummary.model_validate(row.job).model_dump(),
+                "match": MatchSummary.model_validate(row.match) if row.match else None,
+                "match_outdated": row.match_outdated,
+                "scoring": row.scoring,
+            }
+        )
+        for row in rows
+    ]
+    return Page(items=items, total=total, page=page, page_size=page_size)
 
 
 async def _job_or_404(session: SessionDep, job_id: uuid.UUID) -> Job:
@@ -89,6 +124,14 @@ async def _job_or_404(session: SessionDep, job_id: uuid.UUID) -> Job:
 @router.get("/{job_id}", response_model=JobRead)
 async def get_job(job_id: uuid.UUID, session: SessionDep) -> JobRead:
     return JobRead.model_validate(await _job_or_404(session, job_id))
+
+
+@router.patch("/{job_id}", response_model=JobRead)
+async def update_job(job_id: uuid.UUID, body: JobUpdate, session: SessionDep) -> JobRead:
+    """Save or ignore a job (PRD §5.1). Ignored jobs are hidden from lists by default."""
+    job = await _job_or_404(session, job_id)
+    await job_service.set_status(session, job, body.status)
+    return JobRead.model_validate(await job_import.load_job(session, job_id))
 
 
 @router.delete("/{job_id}", status_code=status.HTTP_204_NO_CONTENT)

@@ -30,6 +30,14 @@ class SourceType(StrEnum):
     MANUAL = "manual"
 
 
+class JobStatus(StrEnum):
+    """The user's triage decision (PRD §5.1). "Applied" is tracked by applications (P8)."""
+
+    NEW = "NEW"
+    SAVED = "SAVED"
+    IGNORED = "IGNORED"
+
+
 class SnapshotStatus(StrEnum):
     """Review state of a fetched source snapshot (PRD §15: never silently overwrite)."""
 
@@ -72,6 +80,12 @@ class Job(Base):
     dedup_key: Mapped[str] = mapped_column(Text, unique=True)
     source_update_pending: Mapped[bool] = mapped_column(
         Boolean, default=False, server_default=false()
+    )
+    status: Mapped[JobStatus] = mapped_column(
+        str_enum(JobStatus, "job_status"),
+        default=JobStatus.NEW,
+        server_default=JobStatus.NEW.value,
+        index=True,
     )
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -60,6 +60,9 @@ class MatchRead(BaseModel):
     started_at: datetime | None
     completed_at: datetime | None
     duration_ms: int | None
+    outdated: bool = Field(
+        default=False, description="Resume, profile, job text or rubric changed since scoring"
+    )
 
 
 class ScoreResponse(BaseModel):
