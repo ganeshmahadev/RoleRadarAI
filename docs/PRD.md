@@ -810,29 +810,35 @@ Use `content_hash` for deduplication.
 - Import started from an EURES queue row (or a company page) passes that `company_id`; the job links to it and the company becomes `JOB_FOUND`.
 - Import started from `/jobs` with no company context: link only on an exact `normalized_name` match with the extracted employer name; otherwise leave `company_id` NULL and let the user pick the company. Never guess a company from a fuzzy match.
 
-## JobSource (Decision 2026-10-01)
+## JobSource (Decision 2026-10-01, revised in P4-001)
 
-§27 needs one canonical Job with several source references, so the model adds:
+§27 needs one canonical Job with several source references. Each JobSource row is a **snapshot** of one source URL at one content hash:
 
 ```text
 id UUID
-job_id FK
+job_id FK (cascade)
 source_type TEXT          -- jsonld | greenhouse | lever | ashby | generic_html | manual
 source_url TEXT           -- original URL as submitted
 final_url TEXT            -- after validated redirects
 external_job_id TEXT
 content_hash TEXT
+status                    -- ACCEPTED | PENDING | REJECTED
+normalized JSONB          -- normalized fields of this snapshot (applied on accept)
 raw_payload JSONB
 fetched_at TIMESTAMP
 created_at
 
-UNIQUE(source_url)
+UNIQUE(source_url, content_hash)
 ```
+
+(The first draft said `UNIQUE(source_url)`, which contradicts keeping snapshots of changed content.)
+
+Job additions: `employer_name` (employer as stated by the source, used when no company is linked and for deduplication), `dedup_key` UNIQUE (§27), and `source_update_pending` BOOLEAN. Job keeps no `raw_payload`; raw payloads live on JobSource. The requirement JSONB columns (`required_skills` …) are added in P5, where requirement extraction happens. A job `status` for save/ignore is added in P6, when that behavior is built. Salary fields are stored only when the source states them; they are not parsed in P4.
 
 ### Re-import of a known URL (Decision 2026-10-01)
 
-- Same URL, same `content_hash`: no change; return the existing job and record `fetched_at`.
-- Same URL, different `content_hash`: do **not** silently overwrite. Store a new JobSource snapshot and flag the job `CONTENT_CHANGED` for the user to accept or reject. Existing match scores stay tied to the old content hash.
+- Same URL, same `content_hash` as an existing snapshot: no change; record `fetched_at`.
+- Same URL, new `content_hash`: do **not** silently overwrite. Store a new snapshot with status `PENDING` and set `job.source_update_pending`. The user accepts (fields copied to the job) or rejects it. Existing match scores stay tied to the old content hash.
 
 ---
 

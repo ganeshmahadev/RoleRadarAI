@@ -11,8 +11,8 @@
 ## Current state
 
 ```text
-Active phase: P3 complete (P0, P1, P3 done) — STOPPED for human review
-Active item: none (next: P4-001, needs human go-ahead)
+Active phase: P4 — Job-source connectors
+Active item: P4-002
 Last known-good commit: P3-002 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
@@ -25,7 +25,9 @@ Order (human decision 2026-10-01): **P0 → P1 → P3 → P4 → P2 → P5 → P
 
 Reason: the human asked for the vertical discovery slice (Next.js → FastAPI → Postgres → workbook import → Companies UI → EURES queue → original-job URL importer) before the resume and OpenJev work. P3 runs before P4, so the EURES queue's "Import job URL" action moved to P4-010.
 
-Authorized in the current run: **P0, P1, P3**, then stop for human review.
+Authorized: P0, P1, P3 (done). **P4 authorized 2026-10-01** ("start the next steps"); stop and report after P4.
+
+Push policy (human decision 2026-10-01): push `main` to `origin` (normal push, never force) after each completed phase.
 
 Decisions: `docs/PRD.md` §82. Open decisions (do not guess): `docs/PRD.md` §83 (OD-1..OD-5; OD-1..OD-4 block P5).
 
@@ -377,7 +379,17 @@ P3-001 and P3-002 DONE. Acceptance (IMPLEMENTATION_PLAN §53, as amended): start
 
 ## P4-001 — Add Job and JobSource models
 
-**Status:** TODO
+**Status:** DONE
+
+Start note: models per PRD §15 decisions (nullable `company_id`, JobSource snapshots, `source_update_pending` instead of overwriting). Requirement JSONB columns deferred to P5 (extraction belongs to the job-processing graph).
+
+- [x] `Job` + `JobSource` models, migration `5dc852feacfc` (round-trip + `alembic check` verified on `roleradar_test`);
+- [x] JobSource = snapshot, `UNIQUE(source_url, content_hash)`, status ACCEPTED/PENDING/REJECTED (PRD §15 revised);
+- [x] tests (74 backend total).
+
+**Incident 2026-10-01:** while verifying this migration, a chained `alembic downgrade -1` ran against the **dev DB** after a failed upgrade and dropped `companies`. The dev DB was rebuilt and reseeded (982 companies, all NOT_CHECKED, new UUIDs); any EURES progress recorded before then is lost. Prevention rules added to AGENTS.md §7.
+
+Completion commit: this commit; hash recorded in P4-002.
 
 ---
 
@@ -418,6 +430,8 @@ P3-001 and P3-002 DONE. Acceptance (IMPLEMENTATION_PLAN §53, as amended): start
 **Status:** TODO  
 **Depends on:** P4-003
 
+Verified 2026-10-01 (live probe, read-only): `GET https://boards-api.greenhouse.io/v1/boards/{board}/jobs/{id}` (content is HTML-escaped). Hosted URLs `job-boards.greenhouse.io/{board}/jobs/{id}` (and legacy `boards.greenhouse.io`). `boards-api.eu.greenhouse.io` does not resolve → EU-hosted boards fall back to the employer-page connector. Company-site URLs with `?gh_jid=` have no board token → employer-page connector.
+
 ---
 
 ## P4-006 — Implement Lever connector
@@ -425,12 +439,16 @@ P3-001 and P3-002 DONE. Acceptance (IMPLEMENTATION_PLAN §53, as amended): start
 **Status:** TODO  
 **Depends on:** P4-003
 
+Verified 2026-10-01: `GET https://api.lever.co/v0/postings/{site}/{id}` (EU: `api.eu.lever.co`); hosted `jobs.lever.co/{site}/{id}` / `jobs.eu.lever.co`.
+
 ---
 
 ## P4-007 — Implement Ashby connector
 
 **Status:** TODO  
 **Depends on:** P4-003
+
+Verified 2026-10-01: `GET https://api.ashbyhq.com/posting-api/job-board/{org}?includeCompensation=true` (board-level only; filter by job id); hosted `jobs.ashbyhq.com/{org}/{id}`.
 
 ---
 

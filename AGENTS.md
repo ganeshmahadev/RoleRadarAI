@@ -163,6 +163,10 @@ pnpm test:e2e                          # Playwright + axe; starts an ISOLATED st
 uv sync
 uv run alembic upgrade head
 uv run alembic revision --autogenerate -m "<message>"   # inspect the generated file
+# Verify migrations ONLY against the test DB (never downgrade the dev DB `roleradar`: it holds real queue progress):
+export TEST_DB=postgresql+psycopg://roleradar:roleradar@localhost:5433/roleradar_test
+DATABASE_URL=$TEST_DB uv run alembic upgrade head && DATABASE_URL=$TEST_DB uv run alembic check
+DATABASE_URL=$TEST_DB uv run alembic downgrade base && DATABASE_URL=$TEST_DB uv run alembic upgrade head
 uv run uvicorn app.main:app --reload --port 8000
 uv run celery -A app.workers.celery_app worker --loglevel=INFO
 uv run python -m app.commands.import_siri ../../data/siri_certified_companies_eures_queue.xlsx  # idempotent seed
@@ -170,6 +174,10 @@ uv run ruff check . && uv run ruff format --check .
 uv run mypy                            # strict
 uv run pytest                          # uses Postgres db `roleradar_test` (auto-created, rebuilt from migrations)
 ```
+
+Migration gotcha: with the naming convention, autogenerate emits each Enum CHECK constraint twice. Keep the convention-named `sa.CheckConstraint(..., name=op.f("ck_..."))` and set `create_constraint=False` on the column's `sa.Enum` in the migration.
+
+**Dev database safety:** `roleradar` is real user data with no backups. Never run `alembic downgrade`, `TRUNCATE`, `DROP`, or test fixtures against it, and never chain destructive commands after a step that can fail.
 
 Backend layout: `app/api/v1` (routers), `app/core` (config), `app/db` (engine/session/Base), `app/models` (ORM; import every model in `app/models/__init__.py`), `app/schemas` (Pydantic), `app/services` (business logic), `app/workers` (Celery), `migrations/` (Alembic).
 
