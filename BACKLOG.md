@@ -11,9 +11,9 @@
 ## Current state
 
 ```text
-Active phase: P2 — Resume foundation
-Active item: P2-004
-Last known-good commit: P4-010 (see Overnight handoff)
+Active phase: P2 complete — STOPPED for human review (next: P5 OpenJev matching)
+Active item: none
+Last known-good commit: P2-004 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
 Last updated: 2026-10-01
@@ -304,14 +304,25 @@ Completion commit: `f76b9fb`
 - [x] resume text never logged (test);
 - [x] tests (22; 231 backend total).
 
-Completion commit: this commit; hash recorded in P2-004.
+Completion commit: `d071ef3`
 
 ---
 
 ## P2-004 — Candidate profile review/edit UI
 
-**Status:** TODO  
+**Status:** DONE  
 **Depends on:** P2-003
+
+- [x] `GET/PATCH /resumes/{id}/profile` (partial update; lists trimmed + de-duplicated; years 0–60 with ≤ 1 decimal; languages with CEFR level A1–C2/Native; unknown fields rejected);
+- [x] `/settings/profile` (+ `/settings` redirect, sidebar "Settings"): upload form, resume table (view, make primary, delete with confirm), extracted-text viewer, profile editor (tag inputs, languages rows, remote preference, years), save / discard, loading/empty/error states;
+- [x] bug found by E2E and fixed: the "Saved" confirmation never appeared because the editor remounted after saving;
+- [x] tests: backend 13 (244 total), Vitest 10 new (37 total), Playwright 3 new + axe on `/settings/profile` (15 total).
+
+### P2 phase exit (2026-10-02)
+
+All P2 items DONE. Acceptance (IMPLEMENTATION_PLAN §52): user uploads PDF → text extraction succeeds → extracted content visible → structured profile editable → resume survives restart (verified: Playwright reload; Docker API container recreated with the resume, profile and 0600 file intact, then cleaned up via the API).
+
+Completion commit: this commit.
 
 ### Fields
 
@@ -1022,7 +1033,46 @@ Notes:
 
 # Overnight handoff
 
-## P4 run (latest)
+## P2 run (latest)
+
+```text
+Last updated: 2026-10-02
+Last commit: see `git log -1` (P2-004); pushed to origin/main with this phase
+Current branch: main
+Worktree: clean
+Active phase: none — P0, P1, P3, P4, P2 complete
+Status: STOPPED for human review
+
+Completed this run:
+- docs: rubric_v1 decisions OD-2/3/4/6 (2432f62)
+- P2-001 models (673043f), P2-002 storage + upload validation (f76b9fb),
+  P2-003 extraction + /resumes API (d071ef3), P2-004 profile API + UI (this commit)
+
+Validation (end of P2):
+- backend: ruff, ruff format --check, mypy strict, pytest (244) — PASS
+- migration 886b77401096: round-trip + alembic check on roleradar_test; dev DB upgraded only (982 companies intact)
+- frontend: lint, typecheck, test (37), build — PASS
+- pnpm test:e2e (15, isolated stack incl. resume upload flow + axe) — PASS
+- Docker: rebuilt; upload → API container recreate → resume/profile/file intact → deleted via API (dev DB has 0 resumes)
+
+Blocked / open:
+- OD-1: confirm the OpenJev /v1/systemone contract against the main model card before P5 code.
+- OpenJev latency ~45–50 s/request on the 24 GB Mac (15 GB model footprint); P5 must score asynchronously.
+
+Exact next action (after human approval):
+1. P5-001 DecisionProvider protocol + OpenJevProvider (httpx, timeouts, transport-only retries; not via SafeFetcher).
+2. P5-004 rubric_v1 config (PRD §18/§19 decisions), P5-005 MatchScore model, P5-006 cache key.
+
+Useful commands:
+- ~/models/openjev/start-openjev.sh / stop-openjev.sh; curl http://127.0.0.1:4100/v1/version
+- docker compose up -d; cd apps/api && uv run pytest; pnpm test && pnpm test:e2e
+
+Important observations:
+- Never run pytest with -W error::DeprecationWarning (PyMuPDF segfault; see AGENTS.md).
+- Uploads: Docker volume `uploads` at /var/lib/roleradar/uploads; local runs use apps/api/uploads (git-ignored).
+```
+
+## P4 run
 
 ```text
 Last updated: 2026-10-01

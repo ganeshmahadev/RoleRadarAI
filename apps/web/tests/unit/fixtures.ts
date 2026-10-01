@@ -1,5 +1,6 @@
 import type { Company, CompanyPage } from "@/lib/api/companies";
 import type { Job } from "@/lib/api/jobs";
+import type { Profile, Resume } from "@/lib/api/resumes";
 
 export function makeCompany(overrides: Partial<Company> = {}): Company {
   return {
@@ -74,6 +75,42 @@ export function makeJob(overrides: Partial<Job> = {}): Job {
         normalized: {},
       },
     ],
+    ...overrides,
+  };
+}
+
+export function makeResume(overrides: Partial<Resume> = {}): Resume {
+  return {
+    id: "30000000-0000-4000-8000-000000000001",
+    name: "Alex CV",
+    original_filename: "Alex CV.pdf",
+    mime_type: "application/pdf",
+    size_bytes: 12345,
+    text_hash: "abc",
+    text_chars: 120,
+    is_primary: true,
+    created_at: "2026-10-02T09:00:00Z",
+    updated_at: "2026-10-02T09:00:00Z",
+    raw_text: "Alex Example\nMachine Learning Engineer",
+    ...overrides,
+  };
+}
+
+export function makeProfile(overrides: Partial<Profile> = {}): Profile {
+  return {
+    id: "40000000-0000-4000-8000-000000000001",
+    resume_id: "30000000-0000-4000-8000-000000000001",
+    target_roles: [],
+    skills: ["Python"],
+    years_experience: "5.5",
+    industries: [],
+    education: [],
+    certifications: [],
+    languages: [{ language: "English", level: "C2" }],
+    preferred_locations: [],
+    remote_preference: null,
+    work_authorization: [],
+    updated_at: "2026-10-02T09:00:00Z",
     ...overrides,
   };
 }

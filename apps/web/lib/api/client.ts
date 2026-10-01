@@ -42,10 +42,12 @@ export async function apiFetch<T>(
 ): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`${API_BASE_URL}/api/v1${path}`, {
-      ...init,
-      headers: { "Content-Type": "application/json", ...init?.headers },
-    });
+    // JSON bodies are strings; FormData (file uploads) must set its own multipart boundary.
+    const headers = new Headers(init?.headers);
+    if (typeof init?.body === "string" && !headers.has("Content-Type")) {
+      headers.set("Content-Type", "application/json");
+    }
+    response = await fetch(`${API_BASE_URL}/api/v1${path}`, { ...init, headers });
   } catch {
     throw new ApiError("Cannot reach the RoleRadarAI API", 0);
   }

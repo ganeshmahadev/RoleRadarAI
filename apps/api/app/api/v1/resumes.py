@@ -8,6 +8,7 @@ from app.api.deps import SessionDep
 from app.core.config import get_settings
 from app.models import Resume
 from app.providers.storage import LocalStorageProvider, StorageProvider
+from app.schemas.profile import CandidateProfileRead, CandidateProfileUpdate
 from app.schemas.resume import ResumeRead, ResumeSummary
 from app.services import resume_service
 from app.services.resume_files import MAX_UPLOAD_BYTES
@@ -79,3 +80,18 @@ async def set_primary(resume_id: uuid.UUID, session: SessionDep) -> ResumeSummar
 async def delete_resume(resume_id: uuid.UUID, session: SessionDep, storage: StorageDep) -> Response:
     await resume_service.delete_resume(session, storage, await _resume_or_404(session, resume_id))
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/{resume_id}/profile", response_model=CandidateProfileRead)
+async def get_profile(resume_id: uuid.UUID, session: SessionDep) -> CandidateProfileRead:
+    resume = await _resume_or_404(session, resume_id)
+    return CandidateProfileRead.model_validate(resume.profile)
+
+
+@router.patch("/{resume_id}/profile", response_model=CandidateProfileRead)
+async def update_profile(
+    resume_id: uuid.UUID, body: CandidateProfileUpdate, session: SessionDep
+) -> CandidateProfileRead:
+    resume = await _resume_or_404(session, resume_id)
+    profile = await resume_service.update_profile(session, resume.profile, body)
+    return CandidateProfileRead.model_validate(profile)

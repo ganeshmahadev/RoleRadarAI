@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import CandidateProfile, Resume
 from app.providers.storage import StorageProvider
+from app.schemas.profile import CandidateProfileUpdate
 from app.services.resume_files import sanitize_filename, validate_upload
 from app.services.resume_parser import ResumeParser, text_hash
 
@@ -125,3 +126,29 @@ async def delete_resume(session: AsyncSession, storage: StorageProvider, resume:
             extra={"event": "resume_file_delete_failed", "resume_id": str(resume_id)},
         )
     logger.info("resume_deleted", extra={"event": "resume_deleted", "resume_id": str(resume_id)})
+
+
+LIST_FIELDS = {f for f in PROFILE_FIELDS if f not in ("years_experience", "remote_preference")}
+
+
+async def update_profile(
+    session: AsyncSession, profile: CandidateProfile, changes: CandidateProfileUpdate
+) -> CandidateProfile:
+    for field in changes.model_fields_set:
+        value = getattr(changes, field)
+        if field == "languages":
+            value = [entry.model_dump() for entry in value or []]
+        elif field in LIST_FIELDS and value is None:
+            value = []  # lists are cleared, never null
+        setattr(profile, field, value)
+    await session.commit()
+    await session.refresh(profile)
+    logger.info(
+        "profile_updated",
+        extra={
+            "event": "profile_updated",
+            "resume_id": str(profile.resume_id),
+            "fields": sorted(changes.model_fields_set),
+        },
+    )
+    return profile

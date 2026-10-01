@@ -7,6 +7,7 @@ cd "$(dirname "$0")/../../../api"
 export DATABASE_URL="${E2E_DATABASE_URL:-postgresql+psycopg://roleradar:roleradar@localhost:5433/roleradar_e2e}"
 export REDIS_URL="${E2E_REDIS_URL:-redis://localhost:6379/14}"
 export CORS_ORIGINS='["http://localhost:3100"]'
+export UPLOAD_DIR="$(mktemp -d -t roleradar-e2e-uploads)"   # never the real upload folder
 
 uv run python - <<'PY'
 import os
