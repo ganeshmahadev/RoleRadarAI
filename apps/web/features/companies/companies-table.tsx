@@ -103,6 +103,9 @@ export function CompaniesTable({ query, onQueryChange, renderActions, caption }:
                     </td>
                     <td className="whitespace-nowrap px-3 py-2 text-muted">
                       {formatDateTime(company.eures_last_checked_at)}
+                      {company.eures_checked_by === "scan" && (
+                        <span className="block text-xs">by automated scan</span>
+                      )}
                     </td>
                     <td className="px-3 py-2">
                       <div className="flex items-center gap-2 whitespace-nowrap">

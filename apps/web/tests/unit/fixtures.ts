@@ -18,6 +18,7 @@ export function makeCompany(overrides: Partial<Company> = {}): Company {
     eures_status: "NOT_CHECKED",
     eures_last_checked_at: null,
     eures_notes: null,
+    eures_checked_by: null,
     website_url: null,
     careers_url: null,
     ats_provider: null,

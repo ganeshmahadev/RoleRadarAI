@@ -6,9 +6,10 @@ import type { ReactNode } from "react";
 
 import { MatchBadge } from "@/features/jobs/match-badge";
 import { MATCHES_QUERY } from "@/features/matches/matches-view";
+import { latestDiscoveryRun } from "@/lib/api/discovery";
 import { getQueueStats } from "@/lib/api/eures";
 import { countJobs, DEFAULT_JOB_QUERY, listJobs, type JobListItem } from "@/lib/api/jobs";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatDateTime } from "@/lib/format";
 
 const COUNTS: [string, Record<string, string>][] = [
   ["active", {}],
@@ -39,6 +40,11 @@ export function DashboardView() {
     queryFn: () => listJobs({ ...DEFAULT_JOB_QUERY, pageSize: 5 }),
   });
 
+  const discovery = useQuery({
+    queryKey: ["discovery-runs", "latest"],
+    queryFn: latestDiscoveryRun,
+  });
+
   const tiles: [string, number | undefined, string][] = [
     ["SIRI companies", stats.data?.total, "/companies"],
     ["Companies checked", stats.data?.checked, "/eures"],
@@ -62,6 +68,26 @@ export function DashboardView() {
           </div>
         ))}
       </dl>
+
+      <p className="text-sm text-muted">
+        {discovery.data ? (
+          <>
+            Last search {formatDateTime(discovery.data.started_at ?? discovery.data.created_at)}
+            {discovery.data.trigger === "scheduled" && " (daily run)"}:{" "}
+            {discovery.data.status === "QUEUED" || discovery.data.status === "RUNNING"
+              ? "running"
+              : `${discovery.data.sources.reduce((n, s) => n + s.created, 0)} new jobs, ${
+                  discovery.data.scoring?.counts.DONE ?? 0
+                } scored`}
+            .{" "}
+          </>
+        ) : (
+          "No automated searches yet. "
+        )}
+        <Link href="/discover" className="text-accent underline">
+          Discover →
+        </Link>
+      </p>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Section title="Top matches" more={{ href: "/matches", label: "All matches" }}>

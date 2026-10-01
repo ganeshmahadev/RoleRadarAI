@@ -12,6 +12,11 @@ export UPLOAD_DIR="$(mktemp -d -t roleradar-e2e-uploads)"   # never the real upl
 export MATCH_QUEUE=inline
 export MATCH_RETRY_DELAYS_SECONDS='[0.1, 0.2]'
 export OPENJEV_BASE_URL=http://127.0.0.1:4299
+# Discovery uses offline fakes (tests/fake_jobspy.py, tests/fake_eures.py): never live sites.
+export DISCOVERY_JOBSPY_ENABLED=true
+export EURES_SCRAPER_ENABLED=true
+export DISCOVERY_SOURCES=fake
+export DISCOVERY_PAUSE_SECONDS=0
 
 uv run python - <<'PY'
 import os

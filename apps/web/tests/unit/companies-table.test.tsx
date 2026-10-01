@@ -33,6 +33,7 @@ describe("CompaniesTable", () => {
             cvr: "00012345",
             eures_status: "CHECKED_NO_JOBS",
             eures_last_checked_at: "2026-10-01T09:30:00Z",
+            eures_checked_by: "scan",
           }),
         ]),
       ),
@@ -42,6 +43,7 @@ describe("CompaniesTable", () => {
     expect(await screen.findByRole("rowheader", { name: "3Shape A/S" })).toBeInTheDocument();
     expect(screen.getByText("00012345")).toBeInTheDocument();
     expect(screen.getByText("No relevant jobs")).toBeInTheDocument();
+    expect(screen.getAllByText("by automated scan")).toHaveLength(1);
     const link = screen.getByRole("link", { name: /Open EURES search for 3Shape A\/S/ });
     expect(link).toHaveAttribute("href", expect.stringContaining("keywordsEverywhere=3Shape"));
     expect(link).toHaveAttribute("target", "_blank");

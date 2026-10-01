@@ -881,11 +881,11 @@ Exact next step after unblock: save sanitized search/detail fixtures under `apps
 
 ## P14-006 — Discovery orchestrator, time budget, Celery task, API + SSE
 
-**Status:** IN_PROGRESS — backend done: `discovery_service` (scrape → EURES → score with deadlines; blocked board continues; one active run; guardrail errors), `execute_run(deadline=)`, Celery `roleradar.discovery_run` (not acks_late), inline queue, `/discovery/settings`, `/discovery-runs` (+cancel, SSE); 23 tests (364 backend total). EURES phase live since P14-005. Remaining: frontend (P14-007).
+**Status:** DONE — backend: `discovery_service` (scrape → EURES → score with deadlines; blocked board continues; one active run; guardrail errors), `execute_run(deadline=)`, Celery `roleradar.discovery_run` (not acks_late), inline queue, `/discovery/settings`, `/discovery-runs` (+cancel, SSE); 23 tests (364 backend total). EURES phase live since P14-005.
 
 ## P14-007 — Discover page (settings, Search now, progress, results)
 
-**Status:** TODO
+**Status:** DONE — `/discover` (sidebar): Search now (disabled with the reason when flags are off or no terms), settings form (terms default to profile roles, sources, caps, budgets, validation), live run panel over SSE (phases, per-source table incl. blocked messages, new jobs with scoring state, link to Matches, cancel). Dashboard "Last search" line; Companies/EURES tables show "by automated scan". Fixed: web `source_type` enum lacked the P14 sources (job lists failed to parse; found by E2E). Vitest 56, Playwright 21 (new `discover.spec.ts` on the fake sources; axe on `/discover`).
 
 ## P14-008 — Daily automation (script + launchd; install only after the user picks a time)
 

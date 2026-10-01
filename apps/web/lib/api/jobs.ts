@@ -9,7 +9,12 @@ export const SOURCE_TYPE_LABELS = {
   ashby: "Ashby",
   generic_html: "Employer page",
   manual: "Pasted manually",
+  indeed: "Indeed",
+  linkedin: "LinkedIn",
+  google: "Google Jobs",
+  eures: "EURES",
 } as const;
+// Same values as the API's SourceType (P14 added the discovery sources).
 export const sourceTypeSchema = z.enum([
   "jsonld",
   "greenhouse",
@@ -17,6 +22,10 @@ export const sourceTypeSchema = z.enum([
   "ashby",
   "generic_html",
   "manual",
+  "indeed",
+  "linkedin",
+  "google",
+  "eures",
 ]);
 export type SourceType = z.infer<typeof sourceTypeSchema>;
 

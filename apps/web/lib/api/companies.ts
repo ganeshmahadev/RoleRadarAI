@@ -34,6 +34,8 @@ export const companySchema = z.object({
   eures_status: euresStatusSchema,
   eures_last_checked_at: z.string().nullable(),
   eures_notes: z.string().nullable(),
+  /** "user" or "scan" (automated discovery, PRD §84). */
+  eures_checked_by: z.string().nullable().default(null),
   website_url: z.string().nullable(),
   careers_url: z.string().nullable(),
   ats_provider: z.string().nullable(),
