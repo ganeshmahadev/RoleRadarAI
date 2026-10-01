@@ -11,8 +11,8 @@
 ## Current state
 
 ```text
-Active phase: P4 complete — STOPPED for human review (next: P2 resume foundation)
-Active item: none
+Active phase: P2 — Resume foundation
+Active item: P2-002
 Last known-good commit: P4-010 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
@@ -25,7 +25,7 @@ Order (human decision 2026-10-01): **P0 → P1 → P3 → P4 → P2 → P5 → P
 
 Reason: the human asked for the vertical discovery slice (Next.js → FastAPI → Postgres → workbook import → Companies UI → EURES queue → original-job URL importer) before the resume and OpenJev work. P3 runs before P4, so the EURES queue's "Import job URL" action moved to P4-010.
 
-Authorized: P0, P1, P3 (done). **P4 authorized 2026-10-01** ("start the next steps"); stop and report after P4.
+Authorized: P0, P1, P3, P4 (done). **P2 authorized 2026-10-02** ("start the implementation now"); stop and report after P2.
 
 Push policy (human decision 2026-10-01): push `main` to `origin` (normal push, never force) after each completed phase.
 
@@ -245,16 +245,26 @@ All P1 items DONE. Acceptance (IMPLEMENTATION_PLAN §51): 982 rows import; no du
 
 ## P2-001 — Add Resume and CandidateProfile models
 
-**Status:** TODO  
+**Status:** DONE  
 **Depends on:** P1 phase exit
+
+Start note (2026-10-02): plan for P2 —
+- P2-001 models + migration (Resume, CandidateProfile 1:1, single-primary partial unique index);
+- P2-002 `StorageProvider` (local dir outside web roots; Docker named volume) + upload validation (extension + magic-byte sniffing, 10 MB cap, sanitized display filename, server-generated storage names);
+- P2-003 `ResumeParser` (PyMuPDF / python-docx / UTF-8 text), normalization + SHA-256 `text_hash`, `/resumes` API; extraction failure (e.g. scanned PDF with no text) rejects the upload with a structured error;
+- P2-004 profile API + `/settings/profile` UI (manual entry, PRD §14), Playwright "upload resume" flow.
 
 ### Acceptance criteria
 
-- [ ] Resume model;
-- [ ] CandidateProfile model;
-- [ ] migrations;
-- [ ] primary-resume semantics;
-- [ ] tests.
+- [x] Resume model (`app/models/resume.py`; `file_path` is a server-generated storage key, `size_bytes`, `text_hash` indexed);
+- [x] CandidateProfile model (1:1 with resume, cascade delete; list fields JSONB default `[]`; languages `[{language, level}]`; `remote_preference` onsite|hybrid|remote|any);
+- [x] migration `886b77401096` (round-trip + `alembic check` on `roleradar_test` only);
+- [x] primary-resume semantics: partial unique index `uq_resumes_single_primary` (at most one primary);
+- [x] tests (5; 174 backend total).
+
+Refactor: enum column helper moved to `app/db/types.py::str_enum` (shared by job and resume models).
+
+Completion commit: this commit; hash recorded in P2-002.
 
 ---
 

@@ -6,7 +6,6 @@ from typing import Any
 from sqlalchemy import (
     Boolean,
     DateTime,
-    Enum,
     ForeignKey,
     Text,
     UniqueConstraint,
@@ -18,6 +17,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, column_property, mapped_column, relationship
 
 from app.db.base import Base
+from app.db.types import str_enum
 from app.models.company import Company
 
 
@@ -36,18 +36,6 @@ class SnapshotStatus(StrEnum):
     ACCEPTED = "ACCEPTED"
     PENDING = "PENDING"
     REJECTED = "REJECTED"
-
-
-def _enum(enum: type[StrEnum], name: str) -> Enum:
-    return Enum(
-        enum,
-        name=name,
-        native_enum=False,
-        create_constraint=True,
-        length=32,
-        values_callable=lambda members: [m.value for m in members],
-        validate_strings=True,
-    )
 
 
 class Job(Base):
@@ -72,7 +60,7 @@ class Job(Base):
     employment_type: Mapped[str | None] = mapped_column(Text)
     workplace_type: Mapped[str | None] = mapped_column(Text)
 
-    source_type: Mapped[SourceType] = mapped_column(_enum(SourceType, "source_type"))
+    source_type: Mapped[SourceType] = mapped_column(str_enum(SourceType, "source_type"))
     source_url: Mapped[str | None] = mapped_column(Text)
     external_job_id: Mapped[str | None] = mapped_column(Text)
     apply_url: Mapped[str | None] = mapped_column(Text)
@@ -111,13 +99,13 @@ class JobSource(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     job_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("jobs.id", ondelete="CASCADE"), index=True)
-    source_type: Mapped[SourceType] = mapped_column(_enum(SourceType, "source_type"))
+    source_type: Mapped[SourceType] = mapped_column(str_enum(SourceType, "source_type"))
     source_url: Mapped[str] = mapped_column(Text, index=True)  # as submitted
     final_url: Mapped[str | None] = mapped_column(Text)  # after validated redirects
     external_job_id: Mapped[str | None] = mapped_column(Text)
     content_hash: Mapped[str] = mapped_column(Text)
     status: Mapped[SnapshotStatus] = mapped_column(
-        _enum(SnapshotStatus, "snapshot_status"), default=SnapshotStatus.ACCEPTED
+        str_enum(SnapshotStatus, "snapshot_status"), default=SnapshotStatus.ACCEPTED
     )
     normalized: Mapped[dict[str, Any]] = mapped_column(JSONB)
     raw_payload: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
