@@ -6,11 +6,14 @@ Subject to the robots.txt policy; a disallow means "use manual JD paste".
 from typing import Any
 from urllib.parse import urlsplit
 
+from bs4 import BeautifulSoup, Tag
+
 from app.connectors.base import ExternalJob, NormalizedJob, UrlImportConnector
 from app.connectors.errors import ExtractionFailed, UnsupportedSource
 from app.connectors.http import SafeFetcher
 from app.connectors.jsonld import extract_fields, find_job_postings
 from app.connectors.robots import RobotsPolicy
+from app.connectors.text import clean_text, html_to_text
 from app.models import SourceType
 
 # Below these lengths the extraction is treated as failed rather than importing a stub.
@@ -49,8 +52,41 @@ class EmployerPageConnector(UrlImportConnector):
         return self._generic(url, response.url, html)
 
     def _generic(self, url: str, final_url: str, html: str) -> ExternalJob:
-        raise ExtractionFailed(
-            "No structured job posting was found on this page. Paste the job description manually."
+        """Generic permitted HTML extraction (PRD §26 priority 4)."""
+        soup = BeautifulSoup(html, "html.parser")
+        h1 = soup.find("h1")
+        title = clean_text(h1.get_text(" ")) if isinstance(h1, Tag) else None
+        title = title or _meta(soup, "og:title")
+        if not title and soup.title is not None:
+            title = clean_text(soup.title.get_text())
+        container = next(
+            (
+                found
+                for selector in ("main", "article", "[role=main]", "#content", "body")
+                if isinstance(found := soup.select_one(selector), Tag)
+            ),
+            None,
+        )
+        if container is not None:
+            for noise in container.select("nav, header, footer, aside"):
+                noise.decompose()
+        description = html_to_text(str(container)) if container is not None else ""
+        if not title or len(description) < MIN_GENERIC_DESCRIPTION_CHARS:
+            raise ExtractionFailed(
+                "Could not find a job description on this page. Paste it manually instead."
+            )
+        return ExternalJob(
+            source_type=SourceType.GENERIC_HTML,
+            source_url=url,
+            final_url=final_url,
+            external_id=None,
+            payload={
+                "generic": {
+                    "title": title,
+                    "description": description,
+                    "site_name": _meta(soup, "og:site_name"),
+                }
+            },
         )
 
     async def normalize_job(self, external_job: ExternalJob) -> NormalizedJob:
@@ -79,4 +115,20 @@ class EmployerPageConnector(UrlImportConnector):
                 published_at=fields.published_at,
                 expires_at=fields.expires_at,
             )
+        if external_job.source_type is SourceType.GENERIC_HTML:
+            generic = payload["generic"]
+            return NormalizedJob(
+                source_type=SourceType.GENERIC_HTML,
+                source_url=external_job.source_url,
+                final_url=external_job.final_url,
+                title=generic["title"],
+                description=generic["description"],
+                employer_name=generic.get("site_name"),
+                apply_url=external_job.final_url,
+            )
         raise UnsupportedSource(f"Unexpected payload for {external_job.source_type}")
+
+
+def _meta(soup: BeautifulSoup, prop: str) -> str | None:
+    tag = soup.find("meta", attrs={"property": prop})
+    return clean_text(tag.get("content")) if isinstance(tag, Tag) else None

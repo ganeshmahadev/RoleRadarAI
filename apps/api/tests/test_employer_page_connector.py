@@ -96,3 +96,26 @@ async def test_rejects_non_html_responses() -> None:
     }
     with pytest.raises(UnsupportedSource, match="application/pdf"):
         await connector(routes).fetch_job_by_url(URL)
+
+
+async def test_generic_html_fallback() -> None:
+    c = connector({"careers.example.com/jobs/1042": html_response(fixture("generic_page.html"))})
+    external = await c.fetch_job_by_url(URL)
+    assert external.source_type is SourceType.GENERIC_HTML
+    job = await c.normalize_job(external)
+    assert job.title == "Senior Backend Engineer"  # <h1> preferred over og:title
+    assert job.employer_name == "Harbour Logistics"
+    assert job.apply_url == URL
+    assert job.location is None  # never guessed from free text
+    assert job.description.startswith("Senior Backend Engineer\n\nHarbour Logistics is looking")
+    assert "• Design and operate Python services on Kubernetes" in job.description
+    for noise in ("Careers / Engineering", "Related jobs", "©", "window.tracking"):
+        assert noise not in job.description
+
+
+async def test_generic_fallback_fails_when_no_description() -> None:
+    c = connector(
+        {"careers.example.com/jobs/1042": html_response(fixture("generic_too_short.html"))}
+    )
+    with pytest.raises(ExtractionFailed, match="Paste it manually"):
+        await c.fetch_job_by_url(URL)

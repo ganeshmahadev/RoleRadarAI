@@ -12,7 +12,7 @@
 
 ```text
 Active phase: P4 — Job-source connectors
-Active item: P4-008
+Active item: P4-005
 Last known-good commit: P3-002 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
@@ -442,7 +442,7 @@ Completion commit: `d489b1d`
 - [x] `EmployerPageConnector` (robots.txt checked, incl. cross-host redirect target; HTML only); incomplete data → `EXTRACTION_FAILED` with manual-paste hint;
 - [x] fixtures `tests/fixtures/jobs/jsonld_*.html`; tests (7).
 
-Completion commit: this commit; hash recorded in P4-008.
+Completion commit: `89b5418`
 
 ---
 
@@ -475,10 +475,14 @@ Verified 2026-10-01: `GET https://api.ashbyhq.com/posting-api/job-board/{org}?in
 
 ## P4-008 — Implement generic permitted job-page fallback
 
-**Status:** TODO  
+**Status:** DONE  
 **Depends on:** P4-003
 
-Use deterministic fixtures in tests.
+- [x] used only when no JSON-LD JobPosting exists; title h1 → og:title → <title>; description from main/article/[role=main]/#content/body minus nav/header/footer/aside;
+- [x] < 200 chars or no title → `EXTRACTION_FAILED` (manual paste); location never guessed from free text;
+- [x] fixtures `generic_page.html`, `generic_too_short.html`; tests (2).
+
+Completion commit: this commit; hash recorded in P4-005.
 
 ---
 
