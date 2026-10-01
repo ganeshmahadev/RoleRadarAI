@@ -12,7 +12,7 @@
 
 ```text
 Active phase: P4 — Job-source connectors
-Active item: P4-002
+Active item: P4-003
 Last known-good commit: P3-002 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
@@ -389,25 +389,30 @@ Start note: models per PRD §15 decisions (nullable `company_id`, JobSource snap
 
 **Incident 2026-10-01:** while verifying this migration, a chained `alembic downgrade -1` ran against the **dev DB** after a failed upgrade and dropped `companies`. The dev DB was rebuilt and reseeded (982 companies, all NOT_CHECKED, new UUIDs); any EURES progress recorded before then is lost. Prevention rules added to AGENTS.md §7.
 
-Completion commit: this commit; hash recorded in P4-002.
+Completion commit: `77311fe`
 
 ---
 
 ## P4-002 — Add URL-import security layer
 
-**Status:** TODO  
+**Status:** DONE  
 **Priority:** P0
 
 ### Mandatory
 
-- [ ] HTTP/HTTPS only;
-- [ ] DNS/IP validation;
-- [ ] block localhost;
-- [ ] block private/link-local networks;
-- [ ] block metadata endpoints;
-- [ ] validate redirects;
-- [ ] bounded response sizes/timeouts;
-- [ ] tests.
+- [x] HTTP/HTTPS only, default ports only, no credentials (`app/connectors/http.py`);
+- [x] DNS/IP validation; all resolved addresses must be public; connection pinned to the validated IP (Host + SNI), so no DNS-rebinding window;
+- [x] block localhost (incl. `*.localhost`, `.local`, `.internal`);
+- [x] block private/link-local/CGNAT/IPv4-mapped IPv6 networks;
+- [x] block metadata endpoints (169.254.169.254 et al.);
+- [x] validate redirects (manual, ≤5 hops, each re-validated);
+- [x] bounded response sizes (5 MB)/timeouts (10 s);
+- [x] EURES hosts rejected (`EURES_NOT_ALLOWED`);
+- [x] robots.txt policy for generic pages (`app/connectors/robots.py`, RFC 9309: 4xx allow, 5xx disallow);
+- [x] structured, retry-classified errors (`app/connectors/errors.py`);
+- [x] tests (44, no network) + one live sanity check (TLS via pinned IP, redirect, `localtest.me` → blocked).
+
+Completion commit: this commit; hash recorded in P4-003.
 
 ---
 
