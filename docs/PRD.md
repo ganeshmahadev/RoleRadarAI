@@ -1892,6 +1892,8 @@ GET    /resumes/{id}/profile
 PATCH  /resumes/{id}/profile
 ```
 
+As implemented in P2 (2026-10-02): `POST /resumes` is `multipart/form-data` with `file` (PDF/DOCX/TXT, ≤ 10 MB) and optional `name`; it validates, extracts text and stores in one request, returning `201` with the extracted `raw_text`. `GET /resumes` lists summaries (no text), newest first. The first resume becomes primary; deleting the primary promotes the newest remaining one. A new resume's profile starts as a copy of the current primary resume's profile. Errors: `UNSUPPORTED_FILE_TYPE`, `EMPTY_FILE`, `FILE_TOO_LARGE` (413), `RESUME_EXTRACTION_FAILED` (e.g. scanned PDF, password-protected, damaged file).
+
 ---
 
 ## Companies

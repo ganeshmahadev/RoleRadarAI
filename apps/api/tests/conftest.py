@@ -5,6 +5,7 @@ constraints behave as in production. Start it with `docker compose up -d postgre
 """
 
 import os
+import tempfile
 from collections.abc import AsyncIterator
 from pathlib import Path
 
@@ -14,6 +15,7 @@ TEST_DATABASE_URL = os.environ.get(
 )
 os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 os.environ["REDIS_URL"] = os.environ.get("TEST_REDIS_URL", "redis://localhost:6379/15")
+os.environ["UPLOAD_DIR"] = tempfile.mkdtemp(prefix="roleradar-test-uploads-")
 
 import psycopg  # noqa: E402
 import pytest  # noqa: E402

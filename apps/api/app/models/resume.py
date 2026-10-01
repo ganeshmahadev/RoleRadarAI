@@ -62,6 +62,10 @@ class Resume(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
+    @property
+    def text_chars(self) -> int:
+        return len(self.raw_text)
+
     profile: Mapped["CandidateProfile"] = relationship(
         back_populates="resume", cascade="all, delete-orphan", uselist=False, lazy="selectin"
     )

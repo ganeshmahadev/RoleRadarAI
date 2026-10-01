@@ -7,7 +7,7 @@ from docx import Document
 
 SAMPLE_LINES = [
     "Alex Example",
-    "Machine Learning Engineer — Aarhus, Denmark",
+    "Machine Learning Engineer - Aarhus, Denmark",
     "Experience: 5 years Python, PyTorch, FastAPI; built RAG systems.",
     "Languages: English (C2), Danish (A2)",
 ]
@@ -31,6 +31,18 @@ def make_blank_pdf() -> bytes:
     doc = pymupdf.open()
     doc.new_page()
     data: bytes = doc.tobytes()
+    doc.close()
+    return data
+
+
+def make_locked_pdf() -> bytes:
+    """A password-protected PDF."""
+    doc = pymupdf.open(stream=make_pdf(), filetype="pdf")
+    data: bytes = doc.tobytes(
+        encryption=getattr(pymupdf, "PDF_ENCRYPT_AES_256"),  # noqa: B009  (missing from stubs)
+        user_pw="secret",
+        owner_pw="owner",
+    )
     doc.close()
     return data
 

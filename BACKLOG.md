@@ -12,7 +12,7 @@
 
 ```text
 Active phase: P2 — Resume foundation
-Active item: P2-003
+Active item: P2-004
 Last known-good commit: P4-010 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
@@ -283,23 +283,28 @@ Completion commit: `673043f`
 - [x] structured `AppError` base (`app/core/errors.py`) now shared by upload and job-source errors;
 - [x] tests (35; 209 backend total). Samples generated in-process (`tests/resume_samples.py`), no real personal data.
 
-Completion commit: this commit; hash recorded in P2-003.
+Completion commit: `f76b9fb`
 
 ---
 
 ## P2-003 — Extract resume text
 
-**Status:** TODO  
+**Status:** DONE  
 **Depends on:** P2-002
 
 ### Acceptance criteria
 
-- [ ] PDF extraction;
-- [ ] DOCX extraction;
-- [ ] normalized text;
-- [ ] content hash;
-- [ ] extraction errors surfaced cleanly;
-- [ ] tests.
+- [x] PDF extraction (PyMuPDF, reading order, ≤ 50 pages; password-protected / damaged → clear error);
+- [x] DOCX extraction (python-docx; paragraphs and tables in document order);
+- [x] normalized text (NFKC incl. ligatures, newlines, control chars, whitespace);
+- [x] content hash (`text_hash` = sha256 of normalized text);
+- [x] extraction errors surfaced cleanly (`RESUME_EXTRACTION_FAILED`; < 50 chars = scanned-PDF hint; nothing stored on failure);
+- [x] `/resumes` API: upload (multipart), list, detail, set-primary, delete (file removed; newest promoted); `ResumeParser` + `StorageProvider` injected as FastAPI dependencies;
+- [x] new resume's profile copies the current primary profile (user's own entries, never AI);
+- [x] resume text never logged (test);
+- [x] tests (22; 231 backend total).
+
+Completion commit: this commit; hash recorded in P2-004.
 
 ---
 
