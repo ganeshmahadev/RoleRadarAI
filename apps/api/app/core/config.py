@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:3000"]
 
     # OpenJev runs natively on the macOS host (MLX); see docs/ARCHITECTURE.md.
-    openjev_base_url: str = "http://localhost:4000"
+    openjev_base_url: str = "http://localhost:4100"
     openjev_model: str = "openjev/openjev-MLX-4bit"
 
     upload_dir: str = "./uploads"

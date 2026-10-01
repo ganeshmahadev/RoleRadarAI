@@ -59,9 +59,11 @@ Decision AI  OpenJev MLX 4-bit via DecisionProvider
 Generation   Separate GenerationProvider
 ```
 
-Runtime ports: web 3000, api 8000, postgres 5433 (host) → 5432, redis 6379, OpenJev 4000.
+Runtime ports: web 3000, api 8000, postgres 5433 (host) → 5432, redis 6379, OpenJev 4100.
 
-OpenJev runs **natively on the macOS host** (MLX needs Metal) and is never containerized. From inside Docker, use `http://host.docker.internal:4000`. See `docs/ARCHITECTURE.md`.
+OpenJev runs **natively on the macOS host** (MLX needs Metal) and is never containerized. From inside Docker, use `http://host.docker.internal:4100`. See `docs/ARCHITECTURE.md`.
+
+OpenJev lives outside the repo in `~/models/openjev` (weights + `mlx` venv + `openjev-api/helper`). Start/stop: `~/models/openjev/start-openjev.sh` / `stop-openjev.sh` (binds 127.0.0.1:4100, log `~/models/openjev/openjev.log`). Check: `curl http://127.0.0.1:4100/v1/version`. Never commit model weights.
 
 ---
 

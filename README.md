@@ -7,7 +7,7 @@ A personal job-discovery copilot for companies certified under Denmark's SIRI Fa
 
 ## Requirements
 
-Docker Desktop, Node 22 + pnpm, [uv](https://docs.astral.sh/uv/) (Python 3.13 is installed automatically). OpenJev (P5+) runs natively on an Apple Silicon Mac with MLX on port 4000. It is not part of Docker.
+Docker Desktop, Node 22 + pnpm, [uv](https://docs.astral.sh/uv/) (Python 3.13 is installed automatically). OpenJev (P5+) runs natively on an Apple Silicon Mac with MLX on port 4100. It is not part of Docker.
 
 ## Run everything in Docker
 

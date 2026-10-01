@@ -1,5 +1,5 @@
 # Local development stack. OpenJev is NOT here: it runs natively on the macOS host
-# with MLX (Metal GPU) on port 4000 — see docs/ARCHITECTURE.md.
+# with MLX (Metal GPU) on port 4100 — see docs/ARCHITECTURE.md.
 name: roleradar
 
 services:
@@ -37,7 +37,7 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-roleradar}:${POSTGRES_PASSWORD:-roleradar}@postgres:5432/${POSTGRES_DB:-roleradar}
       REDIS_URL: redis://redis:6379/0
-      OPENJEV_BASE_URL: http://host.docker.internal:4000
+      OPENJEV_BASE_URL: http://host.docker.internal:4100
     command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
     ports:
       - "8000:8000"
@@ -64,7 +64,7 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-roleradar}:${POSTGRES_PASSWORD:-roleradar}@postgres:5432/${POSTGRES_DB:-roleradar}
       REDIS_URL: redis://redis:6379/0
-      OPENJEV_BASE_URL: http://host.docker.internal:4000
+      OPENJEV_BASE_URL: http://host.docker.internal:4100
     command: celery -A app.workers.celery_app worker --loglevel=INFO --concurrency=2
     extra_hosts:
       - "host.docker.internal:host-gateway"

@@ -81,7 +81,7 @@ Required environment variables:
 DATABASE_URL=
 REDIS_URL=
 
-OPENJEV_BASE_URL=http://localhost:4000   # host.docker.internal:4000 from inside Docker
+OPENJEV_BASE_URL=http://localhost:4100   # host.docker.internal:4100 from inside Docker
 OPENJEV_MODEL=openjev/openjev-MLX-4bit
 
 UPLOAD_DIR=
@@ -107,7 +107,7 @@ redis
 worker
 ```
 
-OpenJev runs separately and natively on the Apple host (MLX, port 4000). It is not part of Docker Compose.
+OpenJev runs separately and natively on the Apple host (MLX, port 4100). It is not part of Docker Compose.
 
 Health endpoint returns 200.
 
@@ -118,7 +118,7 @@ web       3000
 api       8000
 postgres  5433 on host → 5432 in container (5432 is already used on the dev machine)
 redis     6379
-openjev   4000 (host, native MLX)
+openjev   4100 (host, native MLX)
 ```
 
 ---

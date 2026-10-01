@@ -484,18 +484,18 @@ domain fit
 
 The model is designed to take text/JSON plus labels/rules and return typed decisions, probabilities or scores. The MLX 4-bit checkpoint is approximately 15 GB and targets Apple Silicon.
 
-Run it separately, natively on the macOS host with MLX (https://huggingface.co/openjev/openjev-MLX-4bit), on port **4000**:
+Run it separately, natively on the macOS host with MLX (https://huggingface.co/openjev/openjev-MLX-4bit), on port **4100**:
 
 ```text
-http://localhost:4000/v1/systemone
+http://localhost:4100/v1/systemone
 ```
 
-OpenJev is **never** run in Docker: MLX needs Apple's Metal GPU, and Docker on macOS runs Linux containers in a VM without Metal access. Port 4000 avoids the Next.js dev server on 3000 (Decision 2026-10-01).
+OpenJev is **never** run in Docker: MLX needs Apple's Metal GPU, and Docker on macOS runs Linux containers in a VM without Metal access. Port 4100 avoids the Next.js dev server on 3000 and another local project's API on 4000 (Decision 2026-10-01; first planned as 4000). The upstream README starts it with `--port 3000`; RoleRadarAI's start script passes `--port 4100`.
 
 The base URL is configuration (`OPENJEV_BASE_URL`):
 
-- API running natively on the host: `http://localhost:4000`
-- API running inside Docker Compose: `http://host.docker.internal:4000`
+- API running natively on the host: `http://localhost:4100`
+- API running inside Docker Compose: `http://host.docker.internal:4100`
 
 FastAPI talks to this service through a provider class. The OpenJev HTTP call must not go through the SSRF-guarded job fetcher (§67), which correctly blocks localhost.
 
@@ -1361,7 +1361,7 @@ FastAPI
     | HTTP
     ↓
 OpenJev local server
-localhost:4000
+localhost:4100
 ```
 
 Provider:
@@ -2676,7 +2676,7 @@ This architecture keeps SIRI and EURES central to the job-search experience whil
 | Date | Decision | Where |
 |---|---|---|
 | 2026-10-01 | Product name is **RoleRadarAI** (replaces CareerScout / JobSignal). | all docs |
-| 2026-10-01 | OpenJev runs natively on the macOS host (MLX), port **4000**; never in Docker. | §11.1, ARCHITECTURE.md |
+| 2026-10-01 | OpenJev runs natively on the macOS host (MLX), port **4100** (4000 is taken by another local project); never in Docker. | §11.1, ARCHITECTURE.md |
 | 2026-10-01 | Build order: P0 → P1 → P3 → P4 → P2 → P5 → … (user instruction: working discovery slice before resume and AI). | IMPLEMENTATION_PLAN.md |
 | 2026-10-01 | Company re-import upserts by CVR and never overwrites EURES workflow state. | §7.1 |
 | 2026-10-01 | EURES status transitions; "Mark checked" = "Mark complete" = "Mark no relevant jobs" → `CHECKED_NO_JOBS`. | §8 |
@@ -2696,7 +2696,7 @@ These are unresolved. Do not invent answers; resolve with the user before the li
 
 | ID | Question | Blocks | Notes |
 |---|---|---|---|
-| OD-1 | OpenJev request/response contract for `/v1/systemone` (payload shape, label/rule format, output schema, model revision field). | P5 | Get it from the running server or the model card; do not guess. |
+| OD-1 | OpenJev request/response contract for `/v1/systemone` (payload shape, label/rule format, output schema, model revision field). | P5 | **Partly observed 2026-10-01** from the running server and its helper source (shim.py@81a22f1b): `POST {state, questions: {id: {type: choice\|score\|noul, instructions, criteria}}}`; `choice.criteria` = map option→description\|null → `{choice, probabilities, confidence}`; `score.criteria` = ordered list of ≥2 levels → `{score}` (expected level index); `noul` → `{noul}` (yes-probability); response `model` string pins model dir + calibration + helper sha (use as `model_revision`); `GET /v1/version`. Still to confirm against the main model card before P5. |
 | OD-2 | Numeric value of `must_have_fit` (MET / PARTIAL / NOT_MET / UNKNOWN) inside the 0–4 formula, especially UNKNOWN. | P5 | e.g. MET=4, PARTIAL=2, NOT_MET=0, UNKNOWN=excluded and flagged; needs approval. |
 | OD-3 | Effect of a hard blocker on `overall_score` and category: cap the score, force "Low Match", or show a separate blocker badge with the score unchanged. | P5 | §19 requires blockers not to be hidden inside an average. |
 | OD-4 | Dimension display format: `x/4` ordinals (§32) or 0–100 bars (§49). Ordinals from the model are integers, so "3.7/4" in §32 has no defined source. | P5/P6 | |

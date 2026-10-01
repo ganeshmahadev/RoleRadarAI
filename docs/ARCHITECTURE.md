@@ -14,13 +14,14 @@
 │                                                       ▲                  │
 │                                                  Celery worker           │
 │                                                                          │
-│  OpenJev MLX server (:4000, native, Metal GPU)  ◄── DecisionProvider     │
+│  OpenJev MLX server (:4100, native, Metal GPU)  ◄── DecisionProvider     │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
 - **Docker Compose** runs `postgres`, `redis`, `api`, `worker` and `web`.
-- **OpenJev never runs in Docker.** MLX needs Apple's Metal GPU, and Docker on macOS runs Linux containers in a VM without Metal access. It runs natively on the host on port 4000.
-- The API reaches OpenJev at `OPENJEV_BASE_URL`: `http://localhost:4000` when the API runs on the host, `http://host.docker.internal:4000` when it runs in Compose.
+- **OpenJev never runs in Docker.** MLX needs Apple's Metal GPU, and Docker on macOS runs Linux containers in a VM without Metal access. It runs natively on the host on port 4100.
+- The API reaches OpenJev at `OPENJEV_BASE_URL`: `http://localhost:4100` when the API runs on the host, `http://host.docker.internal:4100` when it runs in Compose.
+- Start/stop OpenJev with `~/models/openjev/start-openjev.sh` / `stop-openjev.sh` (README command with `--port 4100`, bound to 127.0.0.1; Docker Desktop still reaches it via `host.docker.internal`). It needs ~14 GB of unified memory: on a 24 GB Mac, keep the Docker VM allotment small and close heavy apps, or requests slow from ~seconds to ~a minute because of swapping (measured 2026-10-01).
 - The API and web app can also run natively (with Postgres and Redis in Compose) for faster iteration. The commands are in `AGENTS.md`.
 
 | Service | Port (host) | Runs in |
@@ -30,7 +31,7 @@
 | postgres | 5433 → 5432 | Compose |
 | redis | 6379 | Compose |
 | worker (Celery) | — | Compose or host |
-| OpenJev | 4000 | host only (MLX) |
+| OpenJev | 4100 | host only (MLX) |
 
 ## 2. Service boundaries
 

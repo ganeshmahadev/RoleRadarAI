@@ -86,7 +86,7 @@ health endpoint
 
 ### Notes / blockers
 
-- OpenJev is not part of Compose (native MLX on host, port 4000).
+- OpenJev is not part of Compose (native MLX on host, port 4100 — 4000 is used by another local project).
 - Host port 5432 is already taken on the dev machine; Postgres maps to 5433.
 
 ### Completion commit
@@ -550,13 +550,14 @@ All P4 items DONE. Acceptance (IMPLEMENTATION_PLAN §54): supported URLs produce
 
 ## P5-002 — Run/configure OpenJev local service
 
-**Status:** TODO
+**Status:** DONE (2026-10-01, outside the repo)
 
-Expected local endpoint:
+Endpoint: `http://127.0.0.1:4100/v1/systemone` (Docker: `http://host.docker.internal:4100`). The upstream default 3000 is the RoleRadarAI web app; 4000 is another local project.
 
-```text
-http://localhost:3000/v1/systemone
-```
+- Weights in `~/models/openjev/openjev-MLX-4bit`, all SHA256SUMS verified; helper `openjev-api/helper/shim*.py` at the README-pinned revision (sha 81a22f1b), reviewed: stdlib HTTP server bound to 127.0.0.1, no shell exec.
+- `~/models/openjev/start-openjev.sh` / `stop-openjev.sh` run the README command with `--port 4100` (nohup, pid file, `openjev.log`).
+- Smoke test: choice + noul questions on a resume/JD pair returned sensible answers (skills "strong" 0.58; mandatory Danish B2 met 0.012).
+- **Performance risk:** 55–87 s per 2-question request on the 24 GB Mac because swap was ~97% full (14 GB model + Docker VM 7.75 GB + desktop apps). Expected ~seconds with enough free memory. P5/P7 must treat scoring as async with generous timeouts regardless (PRD §69).
 
 Do not commit model weights into Git.
 
