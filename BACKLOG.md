@@ -12,7 +12,7 @@
 
 ```text
 Active phase: P5 — OpenJev matching
-Active item: P5-004
+Active item: P5-005
 Last known-good commit: P2-004 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
@@ -575,7 +575,7 @@ Plan (2026-10-02): P5-001+P5-003 provider + `/health/openjev` → P5-004 rubric_
 
 ## P5-001 — Define `DecisionProvider`
 
-**Status:** DONE (with P5-003; hash in P5-004)
+**Status:** DONE (with P5-003, commit `64a5ed8`)
 
 - [x] `app/providers/decision.py`: generic `DecisionProvider` (`model_info()`, `decide(state, questions)`), typed `ScoreQuestion` / `YesNoQuestion` and validated answers; errors `DECISION_PROVIDER_UNAVAILABLE` (retryable, 503), `DECISION_REQUEST_REJECTED`, `DECISION_INVALID_RESPONSE`.
 
@@ -610,7 +610,11 @@ Do not commit model weights into Git.
 
 ## P5-004 — Define rubric v1
 
-**Status:** TODO
+**Status:** DONE (hash recorded in P5-005)
+
+- [x] `app/matching/rubric.py`: `RUBRIC_V1` config (levels, weights summing to 1.0, six hard-requirement types with stated/met questions, thresholds 0.5 / 0.75, bands 85/70/55, input caps); questions say "judge only from the text";
+- [x] `app/matching/scoring.py`: pure functions — dimension = level/4×100, requirement labels (boundaries PARTIAL), must-have = mean met-probability of stated types, weight rescaling when none stated, BLOCKED category with unchanged score, bands on the rounded score, two-phase question sets;
+- [x] tests (24; 279 backend total).
 
 Initial dimensions:
 
