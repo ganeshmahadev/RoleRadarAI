@@ -12,7 +12,7 @@
 
 ```text
 Active phase: P2 — Resume foundation
-Active item: P2-002
+Active item: P2-003
 Last known-good commit: P4-010 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
@@ -264,25 +264,26 @@ Start note (2026-10-02): plan for P2 —
 
 Refactor: enum column helper moved to `app/db/types.py::str_enum` (shared by job and resume models).
 
-Completion commit: this commit; hash recorded in P2-002.
+Completion commit: `673043f`
 
 ---
 
 ## P2-002 — Implement resume upload and secure storage
 
-**Status:** TODO  
+**Status:** DONE  
 **Depends on:** P2-001
 
 ### Acceptance criteria
 
-- [ ] PDF;
-- [ ] DOCX;
-- [ ] TXT;
-- [ ] MIME validation;
-- [ ] file-size limits;
-- [ ] filenames sanitized;
-- [ ] files outside public web directories;
-- [ ] tests.
+- [x] PDF, DOCX, TXT accepted (`app/services/resume_files.py::validate_upload`);
+- [x] MIME validation by extension **and** magic bytes (client content type ignored): `%PDF-`; DOCX = zip with `[Content_Types].xml` + `word/document.xml` (zip-bomb guard: ≤ 50 MB uncompressed, ≤ 2000 entries); TXT = UTF-8 / BOM'd UTF-16, no NUL bytes;
+- [x] file-size limit 10 MB (`FILE_TOO_LARGE`, 413); empty file rejected;
+- [x] filenames sanitized for display only (basename, NFKC, no control chars, ≤ 120 chars); storage keys are server-generated random names;
+- [x] files outside public web directories: `StorageProvider` boundary (`app/providers/storage.py`), `LocalStorageProvider` under `UPLOAD_DIR` (dirs 0700, files 0600, atomic writes, path-traversal-proof keys); Docker named volume `uploads` at `/var/lib/roleradar/uploads`;
+- [x] structured `AppError` base (`app/core/errors.py`) now shared by upload and job-source errors;
+- [x] tests (35; 209 backend total). Samples generated in-process (`tests/resume_samples.py`), no real personal data.
+
+Completion commit: this commit; hash recorded in P2-003.
 
 ---
 

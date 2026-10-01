@@ -42,8 +42,17 @@ strict = true
 plugins = ["pydantic.mypy"]
 files = ["app", "tests"]
 
+[[tool.mypy.overrides]]
+# PyMuPDF and python-docx ship without type hints; only these modules call them.
+module = ["app.services.resume_parser", "tests.resume_samples"]
+disallow_untyped_calls = false
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
 asyncio_default_test_loop_scope = "session"
 testpaths = ["tests"]
+filterwarnings = [
+    # PyMuPDF's SWIG bindings warn on import under Python 3.13; harmless.
+    "ignore:builtin type .* has no __module__ attribute:DeprecationWarning",
+]

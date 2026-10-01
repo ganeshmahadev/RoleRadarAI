@@ -1,16 +1,12 @@
 """Structured, retry-classified errors for job-source retrieval (PRD §57, §65)."""
 
+from app.core.errors import AppError
 
-class SourceError(Exception):
-    """Base error. `code` is stable and shown to the API client; `retryable` drives P7 retries."""
+
+class SourceError(AppError):
+    """Base error for job-source retrieval."""
 
     code = "SOURCE_ERROR"
-    retryable = False
-    http_status = 422
-
-    def __init__(self, message: str) -> None:
-        super().__init__(message)
-        self.message = message
 
 
 class InvalidUrl(SourceError):

@@ -9,7 +9,9 @@ RUN uv sync --frozen --no-dev --no-install-project
 ENV PATH="/opt/venv/bin:$PATH"
 
 COPY . .
-RUN useradd --create-home app && chown -R app /app
+# Uploaded resumes live here (Docker named volume), outside any web-served directory.
+RUN useradd --create-home app && chown -R app /app \
+    && mkdir -p /var/lib/roleradar/uploads && chown -R app /var/lib/roleradar && chmod 700 /var/lib/roleradar/uploads
 USER app
 
 EXPOSE 8000

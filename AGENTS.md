@@ -177,6 +177,8 @@ uv run mypy                            # strict
 uv run pytest                          # uses Postgres db `roleradar_test` (auto-created, rebuilt from migrations)
 ```
 
+Test gotcha: do not run pytest with `-W error::DeprecationWarning`; PyMuPDF's SWIG bindings warn at import time and turning that into an error segfaults the interpreter. The harmless warning is filtered in `pyproject.toml`.
+
 Migration gotcha: with the naming convention, autogenerate emits each Enum CHECK constraint twice. Keep the convention-named `sa.CheckConstraint(..., name=op.f("ck_..."))` and set `create_constraint=False` on the column's `sa.Enum` in the migration.
 
 **Dev database safety:** `roleradar` is real user data with no backups. Never run `alembic downgrade`, `TRUNCATE`, `DROP`, or test fixtures against it, and never chain destructive commands after a step that can fail.
