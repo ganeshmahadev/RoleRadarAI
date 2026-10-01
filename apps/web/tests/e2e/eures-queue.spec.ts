@@ -39,7 +39,8 @@ test("daily EURES loop: open, mark checked, continue, refresh", async ({ page, c
   await expect(stat(page, "remaining")).toHaveText("981");
 
   // 4. Add a note to the current company.
-  await panel.getByRole("button", { name: "Add notes for 3Shape A/S" }).click();
+  await panel.getByRole("button", { name: "More actions for 3Shape A/S" }).click();
+  await page.getByRole("button", { name: "Add note" }).click();
   const dialog = page.getByRole("dialog", { name: "EURES notes — 3Shape A/S" });
   await dialog.getByRole("textbox", { name: "Notes" }).fill("Check careers page for ML roles");
   await dialog.getByRole("button", { name: "Save notes" }).click();

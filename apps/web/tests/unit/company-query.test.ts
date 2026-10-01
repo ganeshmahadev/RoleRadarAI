@@ -10,11 +10,12 @@ describe("company query URL state", () => {
       q: "novo",
       status: "checked" as const,
       siriOnly: true,
+      hasJobs: true,
       sort: "name" as const,
       page: 4,
     };
     const params = serializeCompanyQuery(query);
-    expect(params.toString()).toBe("q=novo&status=checked&siri=1&sort=name&page=4");
+    expect(params.toString()).toBe("q=novo&status=checked&siri=1&jobs=1&sort=name&page=4");
     expect(parseCompanyQuery(params)).toEqual(query);
   });
 

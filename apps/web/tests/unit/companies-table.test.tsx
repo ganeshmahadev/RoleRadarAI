@@ -47,10 +47,21 @@ describe("CompaniesTable", () => {
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
     expect(screen.getByText("Showing 1–2 of 2")).toBeInTheDocument();
+    expect(screen.getAllByText("0")).toHaveLength(2); // no jobs yet
     expect(fetch).toHaveBeenCalledWith(
       "http://localhost:8000/api/v1/companies?sort=position&page=1&page_size=50",
       expect.anything(),
     );
+  });
+
+  it("links the jobs count to the company's jobs", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      mockFetchJson(makePage([makeCompany({ jobs_count: 2 })])),
+    );
+    renderTable();
+    expect(
+      await screen.findByRole("link", { name: "View 2 imported jobs for 3Shape A/S" }),
+    ).toHaveAttribute("href", "/jobs?company=00000000-0000-4000-8000-000000000001");
   });
 
   it("shows an empty state", async () => {

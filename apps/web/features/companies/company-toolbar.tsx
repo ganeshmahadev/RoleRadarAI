@@ -102,6 +102,15 @@ export function CompanyToolbar({ query, onQueryChange }: Props) {
         />
         SIRI certified only
       </label>
+      <label className="flex h-8 items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          checked={query.hasJobs}
+          onChange={(event) => onQueryChange({ ...query, hasJobs: event.target.checked, page: 1 })}
+          className="size-4 accent-accent"
+        />
+        Has jobs
+      </label>
     </div>
   );
 }

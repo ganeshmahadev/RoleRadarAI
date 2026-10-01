@@ -179,7 +179,7 @@ Migration gotcha: with the naming convention, autogenerate emits each Enum CHECK
 
 **Dev database safety:** `roleradar` is real user data with no backups. Never run `alembic downgrade`, `TRUNCATE`, `DROP`, or test fixtures against it, and never chain destructive commands after a step that can fail.
 
-Backend layout: `app/api/v1` (routers), `app/core` (config), `app/db` (engine/session/Base), `app/models` (ORM; import every model in `app/models/__init__.py`), `app/schemas` (Pydantic), `app/services` (business logic), `app/workers` (Celery), `migrations/` (Alembic).
+Backend layout: `app/api/v1` (routers), `app/core` (config), `app/db` (engine/session/Base), `app/models` (ORM; import every model in `app/models/__init__.py`), `app/schemas` (Pydantic), `app/services` (business logic), `app/connectors` (job sources: `http.py` SSRF-safe fetcher — the ONLY way to fetch user URLs; `robots.py`; `ats.py`; `employer_page.py`; `registry.py`/`factory.py`), `app/workers` (Celery), `migrations/` (Alembic). Connector tests use fixtures in `tests/fixtures/jobs/` and `httpx.MockTransport` — never live sites.
 
 Frontend layout: `app/` (routes), `components/` (shared UI), `features/<area>/` (feature components), `lib/api/` (typed fetch client + Zod schemas), `tests/unit`, `tests/e2e`.
 

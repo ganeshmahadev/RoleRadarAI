@@ -1,6 +1,7 @@
 "use client";
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { buttonClass } from "@/components/ui/styles";
@@ -17,7 +18,7 @@ interface Props {
   caption: string;
 }
 
-const COLUMNS = ["Company", "CVR", "SIRI", "EURES status", "Last checked", "Actions"];
+const COLUMNS = ["Company", "CVR", "SIRI", "EURES status", "Jobs", "Last checked", "Actions"];
 
 export const companiesQueryKey = (query: CompanyQuery) => ["companies", query] as const;
 
@@ -86,6 +87,19 @@ export function CompaniesTable({ query, onQueryChange, renderActions, caption }:
                     </td>
                     <td className="px-3 py-2">
                       <EuresStatusBadge status={company.eures_status} />
+                    </td>
+                    <td className="px-3 py-2 tabular-nums">
+                      {company.jobs_count > 0 ? (
+                        <Link
+                          href={`/jobs?company=${company.id}`}
+                          className="text-accent hover:underline"
+                          aria-label={`View ${company.jobs_count} imported job${company.jobs_count === 1 ? "" : "s"} for ${company.company_name}`}
+                        >
+                          {company.jobs_count}
+                        </Link>
+                      ) : (
+                        <span className="text-muted">0</span>
+                      )}
                     </td>
                     <td className="whitespace-nowrap px-3 py-2 text-muted">
                       {formatDateTime(company.eures_last_checked_at)}

@@ -26,6 +26,7 @@ export function parseCompanyQuery(
     q: params.get("q") ?? defaults.q,
     status: STATUS_FILTERS.includes(status) ? (status as StatusFilter) : defaults.status,
     siriOnly: params.has("siri") ? params.get("siri") === "1" : defaults.siriOnly,
+    hasJobs: params.has("jobs") ? params.get("jobs") === "1" : defaults.hasJobs,
     sort: SORTS.includes(sort) ? (sort as CompanySort) : defaults.sort,
     page: Number.isFinite(page) && page > 0 ? page : 1,
   };
@@ -36,6 +37,7 @@ export function serializeCompanyQuery(query: CompanyQuery, defaults = DEFAULT_CO
   if (query.q) params.set("q", query.q);
   if (query.status !== defaults.status) params.set("status", query.status);
   if (query.siriOnly !== defaults.siriOnly) params.set("siri", query.siriOnly ? "1" : "0");
+  if (query.hasJobs !== defaults.hasJobs) params.set("jobs", query.hasJobs ? "1" : "0");
   if (query.sort !== defaults.sort) params.set("sort", query.sort);
   if (query.page > 1) params.set("page", String(query.page));
   return params;

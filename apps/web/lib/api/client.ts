@@ -14,6 +14,27 @@ export class ApiError extends Error {
   }
 }
 
+/** Structured job-source error: {code, message, retryable} (PRD §65). */
+export function errorCode(error: unknown): string | null {
+  if (!(error instanceof ApiError)) return null;
+  const detail = error.detail as { code?: unknown } | undefined;
+  return typeof detail?.code === "string" ? detail.code : null;
+}
+
+function errorMessage(detail: unknown, status: number): string {
+  if (typeof detail === "string") return detail;
+  if (detail && typeof detail === "object" && "message" in detail) {
+    const message = (detail as { message: unknown }).message;
+    if (typeof message === "string") return message;
+  }
+  if (Array.isArray(detail) && detail.length > 0) {
+    const first = detail[0] as { msg?: unknown; loc?: unknown[] };
+    const field = Array.isArray(first.loc) ? first.loc.at(-1) : undefined;
+    if (typeof first.msg === "string") return field ? `${String(field)}: ${first.msg}` : first.msg;
+  }
+  return `Request failed (${status})`;
+}
+
 export async function apiFetch<T>(
   path: string,
   schema: z.ZodType<T>,
@@ -31,8 +52,7 @@ export async function apiFetch<T>(
   const body: unknown = await response.json().catch(() => null);
   if (!response.ok) {
     const detail = (body as { detail?: unknown } | null)?.detail;
-    const message = typeof detail === "string" ? detail : `Request failed (${response.status})`;
-    throw new ApiError(message, response.status, detail);
+    throw new ApiError(errorMessage(detail, response.status), response.status, detail);
   }
   return schema.parse(body);
 }

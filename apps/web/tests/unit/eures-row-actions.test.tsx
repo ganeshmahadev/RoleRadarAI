@@ -49,7 +49,9 @@ describe("EuresRowActions", () => {
     renderWithQuery(<EuresRowActions company={makeCompany({ eures_status: "CHECKED_NO_JOBS" })} />);
     expect(screen.getByRole("button", { name: "Reset EURES status for 3Shape A/S" })).toBeVisible();
     expect(screen.queryByRole("button", { name: /no relevant jobs/ })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Mark EURES error/ })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Mark EURES error", hidden: true }),
+    ).not.toBeInTheDocument();
   });
 
   it("saves notes through the dialog", async () => {
@@ -58,7 +60,9 @@ describe("EuresRowActions", () => {
       .mockResolvedValue(mockFetchJson(makeCompany({ eures_notes: "Only sales roles" })));
     renderWithQuery(<EuresRowActions company={makeCompany()} />);
 
-    await userEvent.click(screen.getByRole("button", { name: "Add notes for 3Shape A/S" }));
+    await userEvent.click(screen.getByRole("button", { name: "More actions for 3Shape A/S" }));
+    // jsdom hides [popover] content from the a11y tree; Playwright covers the real popover.
+    await userEvent.click(screen.getByRole("button", { name: "Add note", hidden: true }));
     const dialog = screen.getByRole("dialog", { name: "EURES notes — 3Shape A/S" });
     await userEvent.type(
       within(dialog).getByRole("textbox", { name: "Notes" }),
@@ -81,7 +85,7 @@ describe("EuresRowActions", () => {
       mockFetchJson({ detail: "Company not found" }, 404),
     );
     renderWithQuery(<EuresRowActions company={makeCompany()} />);
-    await userEvent.click(screen.getByRole("button", { name: "Mark EURES error for 3Shape A/S" }));
+    await userEvent.click(screen.getByRole("button", { name: "Mark EURES error", hidden: true }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Company not found");
   });
 });

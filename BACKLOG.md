@@ -11,9 +11,9 @@
 ## Current state
 
 ```text
-Active phase: P4 — Job-source connectors
-Active item: P4-010
-Last known-good commit: P3-002 (see Overnight handoff)
+Active phase: P4 complete — STOPPED for human review (next: P2 resume foundation)
+Active item: none
+Last known-good commit: P4-010 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
 Last updated: 2026-10-01
@@ -511,22 +511,30 @@ content hash
 
 Note: imports run synchronously in the request (target < 10 s); Celery batching is P7.
 
-Completion commit: this commit; hash recorded in P4-010.
+Completion commit: `a375c59`
 
 ---
 
 ## P4-010 — Import job URL from the EURES queue
 
-**Status:** TODO  
+**Status:** DONE  
 **Depends on:** P3-002, P4-003..P4-009
 
 ### Acceptance criteria
 
-- [ ] "Import job URL" action on each EURES queue row;
-- [ ] imported job linked to that company;
-- [ ] company becomes `JOB_FOUND`;
-- [ ] Jobs found column + Has jobs filter on Companies/EURES;
-- [ ] Playwright flow: open EURES → import → next unchecked.
+- [x] "Import job" on each EURES queue row, the current-company panel and Companies rows (URL or manual paste; robots/extraction failures switch to paste with the URL prefilled);
+- [x] imported job linked to that company;
+- [x] company becomes `JOB_FOUND`;
+- [x] Jobs column (links to `/jobs?company=`) + Has jobs filter on Companies/EURES;
+- [x] `/jobs` list and `/jobs/[id]` detail (plain-text description, sources, accept/keep source updates, delete);
+- [x] less frequent actions (note, error, reset) in a native popover "More" menu;
+- [x] Playwright flow: open EURES → EURES URL refused → paste → view job → queue moved on → company shows Job found (11 e2e incl. axe on /jobs).
+
+Bug found by E2E and fixed: refreshing lists right after an import moved the queue to the next company while the dialog stayed open under the wrong company name. Lists now refresh when the dialog closes, and row actions are keyed by company.
+
+### P4 phase exit (2026-10-01)
+
+All P4 items DONE. Acceptance (IMPLEMENTATION_PLAN §54): supported URLs produce title, company, description, location, apply URL, source (fixture tests for JSON-LD, generic, Greenhouse, Lever, Ashby + live check on Lever/Greenhouse); duplicate imports give one canonical job; EURES URLs rejected; robots disallow → manual paste; changed content → snapshot, not overwrite; queue import → JOB_FOUND.
 
 ---
 
@@ -995,9 +1003,46 @@ Notes:
 
 # Overnight handoff
 
+## P4 run (latest)
+
 ```text
 Last updated: 2026-10-01
-Last commit: d4dd3ef (P3-002)
+Last commit: see `git log -1` (P4-010); pushed to origin/main
+Current branch: main (tracks origin/main; push after each phase per human decision)
+Worktree: clean
+Active phase: none — P0, P1, P3, P4 complete
+Status: STOPPED for human review
+
+Completed this run:
+- P4-001 Job/JobSource models (77311fe), P4-002 SSRF fetcher + robots (a13c944),
+  P4-003 connector protocol (d489b1d), P4-004 JSON-LD (89b5418), P4-008 generic (9b93073),
+  P4-005..007 Greenhouse/Lever/Ashby (150ea80), P4-009 import service + API (a375c59),
+  P4-010 UI (this commit)
+
+Validation (end of P4):
+- backend: ruff, ruff format --check, mypy strict, pytest (169) — PASS; alembic check on roleradar_test — no drift
+- frontend: lint, typecheck, test (27), build — PASS
+- pnpm test:e2e (11, isolated stack, axe on /, /companies, /eures, /jobs) — PASS
+- live: Lever + Greenhouse URL import end-to-end on roleradar_test (created → unchanged), cleaned up
+- docker compose up -d --build: all services healthy
+
+Incident:
+- P4-001: dev DB `roleradar` was accidentally downgraded (companies dropped) and reseeded;
+  prior EURES progress lost. Prevention rules in AGENTS.md §7.
+
+Blocked:
+- P5 on PRD §83 OD-1..OD-4.
+
+Exact next action (after human approval):
+1. P2-001 Resume + CandidateProfile models (profile is manual entry, PRD §14).
+2. P2-002 upload + secure storage, P2-003 text extraction, P2-004 profile UI.
+```
+
+## P3 run
+
+```text
+Last updated: 2026-10-01 (P4 run)
+Previous run last commit: d4dd3ef (P3-002)
 Current branch: main (local only; nothing pushed — origin/main does not exist yet)
 Worktree: clean
 Active phase: none — P0, P1, P3 complete; authorized scope finished

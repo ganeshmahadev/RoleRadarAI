@@ -38,6 +38,7 @@ export const companySchema = z.object({
   careers_url: z.string().nullable(),
   ats_provider: z.string().nullable(),
   active: z.boolean(),
+  jobs_count: z.number().int(),
   created_at: z.string(),
   updated_at: z.string(),
 });
@@ -59,6 +60,7 @@ export interface CompanyQuery {
   q: string;
   status: StatusFilter;
   siriOnly: boolean;
+  hasJobs: boolean;
   sort: CompanySort;
   page: number;
   pageSize: number;
@@ -68,6 +70,7 @@ export const DEFAULT_COMPANY_QUERY: CompanyQuery = {
   q: "",
   status: "all",
   siriOnly: false,
+  hasJobs: false,
   sort: "position",
   page: 1,
   pageSize: 50,
@@ -80,6 +83,7 @@ export function toApiParams(query: CompanyQuery): URLSearchParams {
   else if (query.status === "unchecked") params.set("checked", "false");
   else if (query.status !== "all") params.set("eures_status", query.status);
   if (query.siriOnly) params.set("siri_certified", "true");
+  if (query.hasJobs) params.set("has_jobs", "true");
   params.set("sort", query.sort);
   params.set("page", String(query.page));
   params.set("page_size", String(query.pageSize));

@@ -67,7 +67,7 @@ export function CurrentCompany({ afterPosition, onAfterPositionChange }: Props) 
             )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <EuresRowActions company={company} />
+            <EuresRowActions key={company.id} company={company} />
             <button
               type="button"
               className={`${buttonClass} h-7 px-2 text-xs`}
