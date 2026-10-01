@@ -3,7 +3,8 @@
 import asyncio
 import logging
 import uuid
-from typing import Protocol
+from collections.abc import Coroutine
+from typing import Any, Protocol
 
 from anyio import to_thread
 
@@ -22,17 +23,23 @@ class QueueUnavailable(AppError):
 class MatchQueue(Protocol):
     async def enqueue(self, match_id: uuid.UUID) -> None: ...
 
+    async def enqueue_run(self, run_id: uuid.UUID) -> None: ...
+
 
 class CeleryMatchQueue:
-    async def enqueue(self, match_id: uuid.UUID) -> None:
+    async def _send(self, task: str, arg: uuid.UUID) -> None:
         from app.workers.celery_app import celery_app
 
         try:
-            await to_thread.run_sync(
-                lambda: celery_app.send_task("roleradar.score_match", args=[str(match_id)])
-            )
+            await to_thread.run_sync(lambda: celery_app.send_task(task, args=[str(arg)]))
         except Exception as exc:  # broker down, connection refused, ...
             raise QueueUnavailable("The background worker queue (Redis) is not reachable") from exc
+
+    async def enqueue(self, match_id: uuid.UUID) -> None:
+        await self._send("roleradar.score_match", match_id)
+
+    async def enqueue_run(self, run_id: uuid.UUID) -> None:
+        await self._send("roleradar.match_run", run_id)
 
 
 class InlineMatchQueue:
@@ -41,12 +48,20 @@ class InlineMatchQueue:
     def __init__(self) -> None:
         self._tasks: set[asyncio.Task[None]] = set()
 
+    def _spawn(self, coro: Coroutine[Any, Any, None]) -> None:
+        task = asyncio.create_task(coro)
+        self._tasks.add(task)
+        task.add_done_callback(self._tasks.discard)
+
     async def enqueue(self, match_id: uuid.UUID) -> None:
         from app.workers.match_runner import execute_match
 
-        task = asyncio.create_task(execute_match(match_id, retries_left=0))
-        self._tasks.add(task)
-        task.add_done_callback(self._tasks.discard)
+        self._spawn(execute_match(match_id, retries_left=0))
+
+    async def enqueue_run(self, run_id: uuid.UUID) -> None:
+        from app.workers.match_runner import execute_match_run
+
+        self._spawn(execute_match_run(run_id))
 
     async def drain(self) -> None:
         while self._tasks:

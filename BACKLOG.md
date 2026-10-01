@@ -11,8 +11,8 @@
 ## Current state
 
 ```text
-Active phase: P6 complete — STOPPED for human review (next: P7 background/bulk processing)
-Active item: none
+Active phase: P7 — Background/bulk processing
+Active item: P7-003
 Last known-good commit: P6 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
@@ -25,7 +25,7 @@ Order (human decision 2026-10-01): **P0 → P1 → P3 → P4 → P2 → P5 → P
 
 Reason: the human asked for the vertical discovery slice (Next.js → FastAPI → Postgres → workbook import → Companies UI → EURES queue → original-job URL importer) before the resume and OpenJev work. P3 runs before P4, so the EURES queue's "Import job URL" action moved to P4-010.
 
-Authorized: P0, P1, P3, P4, P2, P5 (done). **P6 authorized 2026-10-02** ("start P6"); stop and report after P6.
+Authorized: P0, P1, P3, P4, P2, P5, P6 (done). **P7 authorized 2026-10-02** ("do it"); stop and report after P7.
 
 Push policy (human decision 2026-10-01): push `main` to `origin` (normal push, never force) after each completed phase.
 
@@ -779,27 +779,47 @@ Never label the score as hiring probability.
 
 # Phase P7 — Background/bulk processing
 
+Plan and implementation decisions (2026-10-02, implementation-local):
+- **Match run** = one batch over a scope of jobs for the primary resume: `unscored`, `unscored_or_outdated` (default) or explicit `jobs`. New `match_runs` + `match_run_items` tables record per-job outcome (scored / cached / skipped as not relevant / failed).
+- **Relevance filter (PRD §28 step 1):** a job is relevant when every word of at least one profile target role appears in the job title (normalized, accents folded). Only these go to OpenJev. No target roles → filter off (stated in the run). It can be switched off per run; a single "Score job" click is never filtered.
+- **Sequential:** one Celery task walks the run job by job (OpenJev serializes anyway); cancel stops after the current job. One active run at a time.
+- **Retry classification (P7-004):** OpenJev unavailable / timeout / 5xx → bounded exponential backoff (30 s, 60 s, 120 s); rejected / invalid response / input changed / job deleted → no retry, the job fails and the run continues (PRD §65). If OpenJev stays unavailable after the retries, the run stops (FAILED) and the remaining jobs are marked skipped, instead of burning retries on every job; starting a new run resumes (finished jobs come from the cache). Job-import errors already carry the same `retryable` classification (P4); there is no bulk import in the MVP.
+- **Progress:** `GET /match-runs/{id}/events` (SSE, PRD §44) with polling fallback in the UI; time estimate from the average duration of recent scores.
+- The batch run task is not `acks_late` (a redelivery after Redis's visibility timeout would start a second walker); Redis visibility timeout raised to 4 h for the per-job task.
+
 ## P7-001 — Add Celery task framework
 
-**Status:** TODO
+**Status:** DONE (backend commit; UI in P7-003)
+
+- [x] Celery tasks `roleradar.score_match` (acks_late, 2 retries) and `roleradar.match_run` (not acks_late, no time limit); Redis `visibility_timeout` 4 h; inline queue for tests / worker-less runs.
 
 ---
 
 ## P7-002 — Add match-run queue
 
-**Status:** TODO
+**Status:** DONE
+
+- [x] `match_runs` / `match_run_items` (migration `2c4db9b939ad`, round-trip on `roleradar_test` only);
+- [x] `app/matching/relevance.py` (PRD §28 step 1, all target-role words in the title; 11 tests);
+- [x] `match_run_service`: plan (scope unscored / unscored_or_outdated / jobs; ignored and in-flight jobs excluded), create (one active run; NOTHING_TO_SCORE), sequential execute (cache → CACHED, in-flight → wait, else score), cancel, fail_run, progress with time estimate from the last 20 scores;
+- [x] API: `POST /match-runs/preview`, `POST /match-runs` (202), `GET /match-runs`, `GET /match-runs/{id}`, `POST /match-runs/{id}/cancel`.
 
 ---
 
 ## P7-003 — Add SSE progress updates
 
-**Status:** TODO
+**Status:** IN_PROGRESS
+
+- [x] `GET /match-runs/{id}/events`: `progress` event whenever the run changes, `: keepalive` every 15 s, `end` when finished (poll interval `RUN_EVENTS_POLL_SECONDS`).
+- [ ] UI (batch panel with EventSource + polling fallback).
 
 ---
 
 ## P7-004 — Add retry classification
 
-**Status:** TODO
+**Status:** DONE
+
+- [x] OpenJev unavailable / timeout / 5xx → backoff `MATCH_RETRY_DELAYS_SECONDS` (30, 60, 120); invalid response / rejected / input changed / job gone → no retry, only that job fails; persistent outage stops the run (remaining jobs SKIPPED). Tests: 14 in `test_match_runs.py` (342 backend total).
 
 Retry:
 

@@ -3,6 +3,7 @@
 from app.models.company import Company, EuresStatus
 from app.models.job import Job, JobSource, JobStatus, SnapshotStatus, SourceType
 from app.models.match import MatchScore, MatchStatus
+from app.models.match_run import MatchRun, MatchRunItem, RunItemStatus, RunScope, RunStatus
 from app.models.resume import CandidateProfile, RemotePreference, Resume
 
 __all__ = [
@@ -13,9 +14,14 @@ __all__ = [
     "JobSource",
     "JobStatus",
     "MatchScore",
+    "MatchRun",
+    "MatchRunItem",
     "MatchStatus",
     "RemotePreference",
     "Resume",
+    "RunItemStatus",
+    "RunScope",
+    "RunStatus",
     "SnapshotStatus",
     "SourceType",
 ]

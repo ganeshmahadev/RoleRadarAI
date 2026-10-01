@@ -10,7 +10,12 @@ celery_app = Celery(
     backend=settings.redis_url,
     include=["app.workers.tasks"],
 )
-celery_app.conf.update(task_acks_late=True, worker_prefetch_multiplier=1)
+celery_app.conf.update(
+    task_acks_late=True,
+    worker_prefetch_multiplier=1,
+    # A single job can take ~15 min on a busy Mac; keep Redis from redelivering it meanwhile.
+    broker_transport_options={"visibility_timeout": 4 * 3600},
+)
 
 
 @celery_app.task(name="roleradar.ping")

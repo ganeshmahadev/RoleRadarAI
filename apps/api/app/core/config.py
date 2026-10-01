@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     openjev_timeout_seconds: float = 1800.0
     # "celery" (worker) or "inline" (in the API process; tests and worker-less local runs).
     match_queue: Literal["celery", "inline"] = "celery"
+    # Bounded exponential backoff while OpenJev is unavailable during a batch run (P7-004).
+    match_retry_delays_seconds: list[float] = [30.0, 60.0, 120.0]
+    # How often the SSE progress stream checks the database.
+    run_events_poll_seconds: float = 1.0
 
     upload_dir: str = "./uploads"
     generation_provider: str | None = None
