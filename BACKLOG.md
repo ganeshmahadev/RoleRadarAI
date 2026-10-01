@@ -12,7 +12,7 @@
 
 ```text
 Active phase: P4 — Job-source connectors
-Active item: P4-003
+Active item: P4-004
 Last known-good commit: P3-002 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
@@ -412,14 +412,23 @@ Completion commit: `77311fe`
 - [x] structured, retry-classified errors (`app/connectors/errors.py`);
 - [x] tests (44, no network) + one live sanity check (TLS via pinned IP, redirect, `localtest.me` → blocked).
 
-Completion commit: this commit; hash recorded in P4-003.
+Completion commit: `a13c944`
 
 ---
 
 ## P4-003 — Implement `JobSourceConnector` abstraction
 
-**Status:** TODO  
+**Status:** DONE  
 **Depends on:** P4-001, P4-002
+
+- [x] `JobSourceConnector` protocol + `ExternalJob` / `NormalizedJob` (`app/connectors/base.py`), incl. `can_handle_url` / `fetch_job_by_url` (PRD §9);
+- [x] `UrlImportConnector` base raising `UnsupportedOperation` for company search;
+- [x] `ConnectorRegistry` (validates URL first, then first matching connector);
+- [x] `EuresDiscoveryConnector` (search URL only; every retrieval method refuses);
+- [x] `html_to_text` / `clean_text` (descriptions stored as plain text);
+- [x] tests (8).
+
+Completion commit: this commit; hash recorded in P4-004.
 
 ---
 
