@@ -11,9 +11,9 @@
 ## Current state
 
 ```text
-Active phase: P5 — OpenJev matching
-Active item: P5-007
-Last known-good commit: P2-004 (see Overnight handoff)
+Active phase: P5 complete — STOPPED for human review (next: P6 ranked matching)
+Active item: none
+Last known-good commit: P5 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
 Last updated: 2026-10-01
@@ -680,13 +680,21 @@ rubric version changes
 
 ## P5-007 — Score job action and result panel
 
-**Status:** DONE (hash in handoff)
+**Status:** DONE (commit `86f6944`)
 
 P5 acceptance needs a "Score Job" action that shows all dimensions; the full ranked experience stays in P6.
 
 - [x] Match panel on `/jobs/[id]`: "Score against my resume", queued/running status with elapsed time and 3 s polling, result (score / 100, category or "Blocked: … not met", seven 0–100 dimension bars with n/a for an unstated must-have, stated requirements with ✓/△/✗ and probabilities, unstated types listed, model + rubric + duration, "not a chance of being hired"), failure with retry, clear messages for no resume / OpenJev down;
 - [x] E2E: isolated stack now on ports 3200/8200 with a wire-compatible fake OpenJev (`tests/fake_openjev_server.py`, :4299) and `MATCH_QUEUE=inline`; flow: score → running → blocked result with all dimensions → reload → cached; cleans up after itself;
 - [x] tests: Vitest 4 new (41 total), Playwright 1 new (16 total).
+
+---
+
+### P5 phase exit (2026-10-02)
+
+All P5 items DONE. Acceptance (IMPLEMENTATION_PLAN §55): "Score job" produces all dimensions (E2E + live); result survives restart (persisted; E2E reload; Docker); identical input uses the cache; resume, profile, job content, model revision and rubric version each invalidate it (tests).
+
+**Live run on the real OpenJev (2026-10-02, Docker worker, anonymized sample resume + test job, both deleted afterwards):** 80.1 / 100, category BLOCKED (mandatory Danish C1: met 0.0097); years of experience MET (0.987), work location MET (0.918); other three types not stated; dimensions skills 92, experience 84, role 94, seniority 90, domain 64, education 79, must-have 64. Took **738 s**: phase 1 = 12 questions / 4,917 tokens in 575 s, phase 2 = 3 questions in 162 s (≈ 40–50 s per question while macOS swapped ~16 GB).
 
 ---
 
@@ -1066,7 +1074,41 @@ Notes:
 
 # Overnight handoff
 
-## P2 run (latest)
+## P5 run (latest)
+
+```text
+Last updated: 2026-10-02
+Last commit: see `git log -1`; pushed to origin/main with this phase
+Current branch: main
+Worktree: clean
+Active phase: none — P0, P1, P3, P4, P2, P5 complete
+Status: STOPPED for human review
+
+Completed this run:
+- P5-001/003 DecisionProvider + OpenJevProvider + /health/openjev (64a5ed8)
+- P5-004 rubric_v1 + pure scoring (3bee949)
+- P5-005/006 MatchScore, cache key, Celery/inline queue, /jobs/{id}/score, /matches (d6216f0)
+- P5-007 Match Score panel + E2E with fake OpenJev (86f6944)
+- docs: AGENTS/ARCHITECTURE matching flow (this commit)
+
+Validation (end of P5):
+- backend: ruff, ruff format --check, mypy strict, pytest (299) — PASS
+- migration f8b28895d5f0: round-trip + alembic check on roleradar_test; dev DB upgraded only
+- frontend: lint, typecheck, test (41), build — PASS; pnpm test:e2e (16) — PASS
+- live: real OpenJev via Docker worker → DONE in 738 s, sensible result (see P5 phase exit); test data removed;
+  user's resume ("Data Scientist", primary) untouched
+
+Observations:
+- OpenJev on the 24 GB Mac: ~40–50 s per question → ~10–13 min per job (15 questions). Fine for
+  one-at-a-time scoring; P7 bulk matching must use the relevance filter (PRD §28) and run sequentially.
+- Port 3100 is used by the Flenspay platform dev server; E2E now uses 3200/8200/4299.
+
+Exact next action (after human approval):
+1. P6: ranked Matches list (score sort, blocked jobs below unblocked by default with a toggle,
+   filters), Jobs list Match column, job save/ignore status (PATCH /jobs/{id}), dashboard counts.
+```
+
+## P2 run
 
 ```text
 Last updated: 2026-10-02

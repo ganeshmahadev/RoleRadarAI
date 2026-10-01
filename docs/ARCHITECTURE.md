@@ -65,11 +65,28 @@ StorageProvider      local upload dir (P2)
 | MatchScore | P5 | stores dimensions, model, revision, rubric version and input hash (PRD §16) |
 | Application | P8 | references the exact resume, job and artifacts |
 
-## 5. EURES boundary
+## 5. Matching flow (P5)
+
+```text
+POST /jobs/{id}/score ──► model_info (OpenJev /v1/version) ──► input_hash
+        │                                                        │
+        │  cached DONE / in-flight → 200                         │ new → MatchScore QUEUED → 202
+        ▼                                                        ▼
+   UI polls GET /matches/{id}                    Celery roleradar.score_match (or inline queue)
+                                                        │
+                       build_state (PRD §30 text, capped) ─► OpenJev phase 1: 6 dimension scores + 6 "stated?"
+                                                        ─► OpenJev phase 2: "met?" for stated types only
+                                                        ─► rubric_v1 formula (app code) ─► DONE
+```
+
+- `input_hash` = resume text hash + profile hash + job content hash + model revision + rubric version; a partial unique index keeps one live match per input.
+- OpenJev outage: the match goes back to QUEUED and Celery retries twice with backoff, then FAILED.
+
+## 6. EURES boundary
 
 RoleRadarAI **never** fetches or extracts EURES vacancy content (PRD §8). It only builds search URLs, which the user opens in their own browser, and records the workflow status. The job importer rejects EURES hosts.
 
-## 6. Security boundaries (PRD §67)
+## 7. Security boundaries (PRD §67)
 
 - URL importer: http/https only. It blocks localhost, loopback, RFC1918, link-local, metadata endpoints, `file://` and `ftp://`. It resolves DNS once and connects to the validated IP, re-validates every redirect hop, and enforces bounded size and timeout.
 - The OpenJev client is a separate, configured internal client and does not go through the SSRF-guarded fetcher.
