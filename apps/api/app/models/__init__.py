@@ -2,6 +2,7 @@
 
 from app.models.company import Company, EuresStatus
 from app.models.job import Job, JobSource, SnapshotStatus, SourceType
+from app.models.match import MatchScore, MatchStatus
 from app.models.resume import CandidateProfile, RemotePreference, Resume
 
 __all__ = [
@@ -10,6 +11,8 @@ __all__ = [
     "EuresStatus",
     "Job",
     "JobSource",
+    "MatchScore",
+    "MatchStatus",
     "RemotePreference",
     "Resume",
     "SnapshotStatus",

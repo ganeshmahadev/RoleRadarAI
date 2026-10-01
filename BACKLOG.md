@@ -12,7 +12,7 @@
 
 ```text
 Active phase: P5 — OpenJev matching
-Active item: P5-005
+Active item: P5-007
 Last known-good commit: P2-004 (see Overnight handoff)
 Current branch: main
 Worktree: clean after P0 commit
@@ -610,7 +610,7 @@ Do not commit model weights into Git.
 
 ## P5-004 — Define rubric v1
 
-**Status:** DONE (hash recorded in P5-005)
+**Status:** DONE (commit `3bee949`)
 
 - [x] `app/matching/rubric.py`: `RUBRIC_V1` config (levels, weights summing to 1.0, six hard-requirement types with stated/met questions, thresholds 0.5 / 0.75, bands 85/70/55, input caps); questions say "judge only from the text";
 - [x] `app/matching/scoring.py`: pure functions — dimension = level/4×100, requirement labels (boundaries PARTIAL), must-have = mean met-probability of stated types, weight rescaling when none stated, BLOCKED category with unchanged score, bands on the rounded score, two-phase question sets;
@@ -634,7 +634,12 @@ Application code owns weights.
 
 ## P5-005 — Persist match results
 
-**Status:** TODO
+**Status:** DONE (with P5-006; hash recorded in P5-007)
+
+- [x] `MatchScore` model + migration `f8b28895d5f0` (round-trip + `alembic check` on `roleradar_test` only): status QUEUED/RUNNING/DONE/FAILED, all input hashes, model provider/name/revision, rubric version, seven 0–100 dimensions, blocker flag, per-requirement checks, matched/partial/missing lists, explanation (per-dimension probabilities, tokens, truncation), errors, attempts, timings; cascades with job and resume;
+- [x] `match_service`: request (cache / in-flight / new), two-phase run (dimensions + "stated?" → "met?" only for stated types), deferred on provider outage, `INPUT_CHANGED` guard, structured logs `match_started|completed|failed|deferred`;
+- [x] queue: `CeleryMatchQueue` (`roleradar.score_match`, acks_late, 2 retries with backoff on provider outage, 1 h limit) and `InlineMatchQueue` (`MATCH_QUEUE=inline`);
+- [x] API: `POST /jobs/{id}/score` (200 cached/in-flight, 202 queued, 409 no primary resume, 503 OpenJev or queue down), `GET /matches/{id}`, `GET /matches?job_id=&resume_id=`.
 
 Persist:
 
@@ -655,7 +660,10 @@ overall score
 
 ## P5-006 — Implement score caching/invalidation
 
-**Status:** TODO
+**Status:** DONE (with P5-005)
+
+- [x] `input_hash` = sha256(resume text hash, profile hash, job content hash, model revision, rubric version); partial unique index `uq_match_scores_live_input` (non-FAILED) also prevents duplicate concurrent scoring;
+- [x] tests: identical input cached; resume, profile, job content, model revision and rubric version each invalidate; in-flight not duplicated; FAILED never blocks a retry (20 tests; 299 backend total).
 
 Cache key must change when:
 
@@ -669,6 +677,14 @@ rubric version changes
 ---
 
 # Phase P6 — Ranked matching experience
+
+## P5-007 — Score job action and result panel
+
+**Status:** IN_PROGRESS
+
+P5 acceptance needs a "Score Job" action that shows all dimensions; the full ranked experience stays in P6.
+
+---
 
 ## P6-001 — Build Jobs list
 
