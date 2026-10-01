@@ -29,7 +29,7 @@ Authorized: P0, P1, P3 (done). **P4 authorized 2026-10-01** ("start the next ste
 
 Push policy (human decision 2026-10-01): push `main` to `origin` (normal push, never force) after each completed phase.
 
-Decisions: `docs/PRD.md` §82. Open decisions (do not guess): `docs/PRD.md` §83 (OD-1..OD-5; OD-1..OD-4 block P5).
+Decisions: `docs/PRD.md` §82. Open decisions (do not guess): `docs/PRD.md` §83 (OD-1 partly observed, still to confirm before P5; OD-5 future; OD-2/3/4/6 resolved 2026-10-02).
 
 ---
 
@@ -540,7 +540,9 @@ All P4 items DONE. Acceptance (IMPLEMENTATION_PLAN §54): supported URLs produce
 
 # Phase P5 — OpenJev matching
 
-**Blocked on:** `docs/PRD.md` §83 OD-1..OD-4.
+**Decisions resolved 2026-10-02:** OD-2, OD-3, OD-4, OD-6 (PRD §18, §19, §21, §82). Remaining before P5 code: confirm OD-1 (OpenJev contract) against the main model card; the observed contract already covers the `score` and `noul` question types rubric_v1 uses.
+
+**Depends on:** P2 (scoring needs an uploaded resume + profile).
 
 ## P5-001 — Define `DecisionProvider`
 

@@ -961,6 +961,21 @@ Normalize to:
 
 Weights must live in configuration/database, not hard-coded inside prompts.
 
+### rubric_v1 scales (Decision 2026-10-02, resolves OD-2 and OD-4)
+
+- **Every dimension is on 0–100.** Skills, experience, role, seniority, domain and education use OpenJev `score` questions over the five ordered levels of §17 (0 = clear mismatch … 4 = excellent). OpenJev returns the expected level (for example 3.7), and the dimension score is `level / 4 × 100` (92.5). This is the source of fractional values; the UI shows 0–100 bars (§49), not `x/4` (§32's `x/4` example is superseded).
+- **Must-have coverage** = the average, × 100, of the "candidate meets it" probabilities of the must-have requirements the vacancy actually states (§19). Requirements the vacancy does not state are left out. If the vacancy states none, the must-have weight is dropped and the remaining weights are rescaled to sum to 100%.
+- **Requirement labels** from the "candidate meets it" probability *p*:
+
+| *p* | Label |
+|---|---|
+| p > 0.75 | MET |
+| 0.50 ≤ p ≤ 0.75 | PARTIAL |
+| p < 0.50 | NOT_MET |
+| requirement not stated by the vacancy | UNKNOWN (not scored) |
+
+`overall_score` = weighted sum of the 0–100 dimension scores, rounded for display. Thresholds and weights are configuration under `rubric_version`.
+
 ---
 
 # 19. Hard Requirements
@@ -994,6 +1009,29 @@ blocker
 warning
 informational
 ```
+
+### Requirement checks and blockers (Decision 2026-10-02, resolves OD-3 and OD-6)
+
+OpenJev classifies text; it does not extract requirement lists, and no GenerationProvider exists before P9. So in rubric_v1 the must-have requirements are the fixed **hard-requirement types** above. For each type OpenJev answers two `noul` (yes/no probability) questions:
+
+1. Does the vacancy require this as mandatory? (probability > 0.5 = stated)
+2. Does the candidate meet it, based on the resume and profile? → *p*, labelled with the §18 thresholds.
+
+| Stated? | Label | Classification |
+|---|---|---|
+| no | UNKNOWN | informational (not scored) |
+| yes | MET | — |
+| yes | PARTIAL | **warning** |
+| yes | NOT_MET | **blocker** |
+
+Effect of a blocker (Decision 2026-10-02):
+
+- `overall_score` is **not changed**; it keeps measuring fit.
+- The category becomes **Blocked** instead of the §21 band, with a badge naming the reason (for example "Blocked: Danish B2 required").
+- The Matches list ranks blocked jobs **below** all unblocked jobs by default; a toggle mixes them back in by score.
+- Rationale: capping the score would hide information, and OpenJev can misread "nice to have" text as mandatory, so the user must still see the underlying fit.
+
+Soft skills (Python, AWS, …) are judged through the skills-fit dimension, not listed one by one, until requirement extraction exists (P9+).
 
 ---
 
@@ -1056,6 +1094,8 @@ UI categories:
 ```
 
 These boundaries are application configuration, not model truth.
+
+A job with at least one blocker (§19) shows the category **Blocked** instead of its band; its score is unchanged.
 
 ---
 
@@ -2687,6 +2727,10 @@ This architecture keeps SIRI and EURES central to the job-search experience whil
 | 2026-10-01 | Companies UI shows only controls whose data exists in the current phase. | §23 |
 | 2026-10-01 | Definition of a "permitted" source. | §26 |
 | 2026-10-01 | Profile route is `/settings/profile` (Profile sits under Settings in the §46 navigation). | §22, §45 |
+| 2026-10-02 | Requirement labels from OpenJev probability: > 0.75 MET, 0.50–0.75 PARTIAL, < 0.50 NOT_MET; UNKNOWN = not stated by the vacancy, not scored (OD-2). | §18 |
+| 2026-10-02 | Blocker = hard-requirement type stated as mandatory and NOT_MET; score unchanged, category "Blocked", ranked below unblocked jobs by default; PARTIAL = warning (OD-3). | §19, §21 |
+| 2026-10-02 | All dimensions and the overall score on 0–100; dimension = expected level / 4 × 100 (OD-4). | §18, §49 |
+| 2026-10-02 | Must-have requirements = the §19 hard-requirement types, each checked with two OpenJev yes/no questions (required? met?); no free-text extraction before P9 (OD-6). | §19 |
 
 ---
 
@@ -2697,7 +2741,8 @@ These are unresolved. Do not invent answers; resolve with the user before the li
 | ID | Question | Blocks | Notes |
 |---|---|---|---|
 | OD-1 | OpenJev request/response contract for `/v1/systemone` (payload shape, label/rule format, output schema, model revision field). | P5 | **Partly observed 2026-10-01** from the running server and its helper source (shim.py@81a22f1b): `POST {state, questions: {id: {type: choice\|score\|noul, instructions, criteria}}}`; `choice.criteria` = map option→description\|null → `{choice, probabilities, confidence}`; `score.criteria` = ordered list of ≥2 levels → `{score}` (expected level index); `noul` → `{noul}` (yes-probability); response `model` string pins model dir + calibration + helper sha (use as `model_revision`); `GET /v1/version`. Still to confirm against the main model card before P5. |
-| OD-2 | Numeric value of `must_have_fit` (MET / PARTIAL / NOT_MET / UNKNOWN) inside the 0–4 formula, especially UNKNOWN. | P5 | e.g. MET=4, PARTIAL=2, NOT_MET=0, UNKNOWN=excluded and flagged; needs approval. |
-| OD-3 | Effect of a hard blocker on `overall_score` and category: cap the score, force "Low Match", or show a separate blocker badge with the score unchanged. | P5 | §19 requires blockers not to be hidden inside an average. |
-| OD-4 | Dimension display format: `x/4` ordinals (§32) or 0–100 bars (§49). Ordinals from the model are integers, so "3.7/4" in §32 has no defined source. | P5/P6 | |
+| OD-2 | ~~Numeric value of `must_have_fit`~~ | — | **Resolved 2026-10-02**, see §18 and §82. |
+| OD-3 | ~~Effect of a hard blocker~~ | — | **Resolved 2026-10-02**, see §19 and §82. |
+| OD-4 | ~~Dimension display format~~ | — | **Resolved 2026-10-02**: 0–100 everywhere, see §18 and §82. |
 | OD-5 | What happens to companies missing from a later SIRI list (keep, mark `siri_certified=false`, or `active=false`). | future SIRI refresh | Not needed for the one-time seed import. |
+| OD-6 | ~~How must-have requirements are obtained without an extractor~~ | — | **Resolved 2026-10-02**: fixed hard-requirement types with two OpenJev yes/no questions each, see §19 and §82. |
